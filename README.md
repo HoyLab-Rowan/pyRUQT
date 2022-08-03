@@ -25,10 +25,9 @@ New Calculation Types:
     
 New features:
   1.  Automatically run simple Molcas MC-PDFT calculations from pyRUQT
-  2.  Ability to choose MC-PDFT electronic state to use for transport calculation
-  3.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
-  4.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
-  5.  Automatic plotting of transport results in PNG format
+  2.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
+  3.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
+  4.  Automatic plotting of transport results in PNG format
 
 Required:
 
