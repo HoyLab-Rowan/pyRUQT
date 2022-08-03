@@ -13,8 +13,9 @@ Each currently supported engine type (ASE and RUQT-Fortran) offer a different ap
 interactions, and coupling (see Paper #2). Separate Hamiltonian and Overlap matrices for the extended molecule and repeating electrode blocks are used to 
 construct the Green's functions.
 
-2. RUQT-Fortran: Metal wide band limit approximation with user provided Fermi level and coupling constants (Papers 1 & 3). Only 1 Hamiltonian and Overlap 
-matrix is used to contruct the Green's Functions which are divided by program into the electrode and 
+2. RUQT-Fortran Transport Engine: Metal wide band limit approximation with user provided Fermi level and coupling constants (Papers 1 & 3). Only 1 
+Hamiltonian and Overlap matrix is used to contruct the Green's Functions which are divided by program into the electrode and extended molecule regions 
+based on number of electrode atoms specificed by user.
 
 This software runs the standard Landuaer current, conductance, and zero-bias transmission calculations found in RUQT-Fortran/ASE and adds additional 
 calculation types and features not found in either:
