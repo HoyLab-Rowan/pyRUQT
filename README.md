@@ -21,14 +21,14 @@ This software runs the standard Landuaer current, conductance, and zero-bias tra
 calculation types and features not found in either:
 
 New Calculation Types:
-    Differential Conductance
+  1. Differential Conductance
     
 New features:
-    Automatically run simple Molcas MC-PDFT calculations from pyRUQT
-    Ability to choose MC-PDFT electronic state to use for transport calculation
-    Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
-    Options to include additional electrode-molecule coupling for ASE NEGF caculations
-    Automatic plotting of transport results in PNG format
+  1.  Automatically run simple Molcas MC-PDFT calculations from pyRUQT
+  2.  Ability to choose MC-PDFT electronic state to use for transport calculation
+  3.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
+  4.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
+  5.  Automatic plotting of transport results in PNG format
 
 Required:
 
@@ -58,7 +58,7 @@ If you use this code in your research please cite:
 1. Andrew M. Sand, Justin T. Malme, and Erik P. Hoy, “A multiconfigurational pair-density functional theory approach to molecular junctions”, J. Chem. Phys., 155(11), 114115 (2021). https://doi.org/10.1063/5.0063293 
 
 If you use the ASE transport engine also cite:
-2. Ask Hjorth Larsen et al. J. Phys.: Condens. Matter 29, 273002 (2017). https:.//dog.org/10.1088/1361-648X/aa680e
+2. Ask Hjorth Larsen et al. J. Phys.: Condens. Matter 29, 273002 (2017). https://dog.org/10.1088/1361-648X/aa680e
 
 If you use the RUQT-Fortran transport engine also cite:
 3. Erik P. Hoy, David A. Mazziotti, and Tamar Seideman, “Development and application of a 2-electron reduced density matrix approach to electron transport via molecular junctions”, J. Chem. Phys. 147, 184110 (2017). https://doi.org/10.1063/1.4986804
