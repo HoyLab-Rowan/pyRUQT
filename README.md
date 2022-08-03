@@ -54,10 +54,14 @@ Quick Installation
     Use the pyRUQT_example.py script to get started running calculations.
 
 If you use this code in your research please cite:
+
 1. Andrew M. Sand, Justin T. Malme, and Erik P. Hoy, “A multiconfigurational pair-density functional theory approach to molecular junctions”, J. Chem. Phys., 155(11), 114115 (2021). https://doi.org/10.1063/5.0063293 
 
 If you use the ASE transport engine also cite:
+
 2. Ask Hjorth Larsen et al. J. Phys.: Condens. Matter 29, 273002 (2017). https://dog.org/10.1088/1361-648X/aa680e
 
 If you use the RUQT-Fortran transport engine also cite:
-3. Erik P. Hoy, David A. Mazziotti, and Tamar Seideman, “Development and application of a 2-electron reduced density matrix approach to electron transport via molecular junctions”, J. Chem. Phys. 147, 184110 (2017). https://doi.org/10.1063/1.4986804
+
+3. Erik P. Hoy, David A. Mazziotti, and Tamar Seideman, “Development and application of a 2-electron reduced density matrix approach to electron transport 
+via molecular junctions”, J. Chem. Phys. 147, 184110 (2017). https://doi.org/10.1063/1.4986804
