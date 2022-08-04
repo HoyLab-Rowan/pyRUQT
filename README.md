@@ -31,7 +31,10 @@ New features:
 
 Required:
 
-Numpy and Scipy
+Python3, Numpy, Scipy, and Matplotlib (ASE only)
+
+MKL (RUQT-Fortran)
+
 
 NEGF Transport Calculator Options. Only 1 of the following are required but both recommended.
 
