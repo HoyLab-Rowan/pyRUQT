@@ -1,7 +1,7 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
-***Note: This is a placeholder for the release version that currently in progress. Full release of code coming later this month (August 2022)
+***Note: This is a placeholder for the release version that currently in progress. Full release of code coming later this month (August 2022)***
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods.It can use both an optmized version of the 
