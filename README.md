@@ -9,7 +9,7 @@ orginial RUQT code (RUQT-Fortran) or the Atomic Simulation Engine (ASE) for tran
 DFT (PySCF), and mixed method NEGF calculations (ex. MC-PDFT for extended molecule region and DFT for electrodes). Support for NEGF-RDM to come in furture 
 (NEGF-RDM will require Maple with QC-Toolbox).
 
-Each currently supported engine type (ASE and RUQT-Fortran) offer a different approach to treating electrode-extended molecule interactions and coupling:
+Each currently supported engine type (ASE and RUQT-Fortran) offers a different approach to treating electrode-extended molecule interactions and coupling:
 
 1. ASE Transport Engine (default): Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
 interactions, and coupling (see Paper #2). Separate Hamiltonian and Overlap matrices for the extended molecule and repeating electrode blocks are used to 
