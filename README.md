@@ -52,7 +52,7 @@ Electronic Structure Calculator Options. Only 1 of the following are required bu
 
 Quick Installation
 
-    Put the ruqt.py file in your python module folder.
+    Put the pyruqt.py and ruqt.py files in your python module folder.
 
     Install ASE, OpenMolcas(sandx_fock branch), and optionally PySCF for all users.
 
