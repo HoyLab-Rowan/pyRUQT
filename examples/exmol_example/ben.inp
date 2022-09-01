@@ -1,0 +1,38 @@
+&GATEWAY
+coord=ben_birad.xyz
+basis=lanl2dz
+group=nosym
+
+
+&SEWARD
+NODEleted
+grid input
+grid=fine
+end of grid input
+
+&SCF &END
+
+&RASSCF &END
+nActEl
+8 0 0
+INACTIVE
+79
+RAS2
+8
+DELEted
+0 0 0 0
+Symmetry
+1
+Spin
+1
+CIROot
+1 1; 1
+
+&GRID_IT
+ALL
+
+  &MCPDFT &END
+  KSDFT=T:PBE
+  GRADIENT
+  End of input
+

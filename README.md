@@ -4,14 +4,14 @@ Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Funct
 ***Note: This is a placeholder for the release version that currently in progress. Full release of code coming later this month (August 2022)***
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
-transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods.It can use both an optmized version of the 
+transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
 orginial RUQT code (RUQT-Fortran) or the Atomic Simulation Engine (ASE) for transport calculations and is currently capable of performing NEGF-MCPDFT, NEGF-
 DFT (PySCF), and mixed method NEGF calculations (ex. MC-PDFT for extended molecule region and DFT for electrodes). Support for NEGF-RDM to come in furture 
-(NEGF-RDM will require Maple with QC-Toolbox).
+(NEGF-RDM will require the Maple Quantum Chemistry Toolbox).
 
-Each currently supported engine type (ASE and RUQT-Fortran) offers a different approach to treating electrode-extended molecule interactions and coupling:
+Each currently supported NEGF engine type (ASE and RUQT-Fortran) offers a different approach to treating electrode-extended molecule interactions and coupling:
 
-1. ASE Transport Engine (default): Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
+1. ASE Transport Engine: Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
 interactions, and coupling (see Paper #2). Separate Hamiltonian and Overlap matrices for the extended molecule and repeating electrode blocks are used to 
 construct the Green's functions.
 
@@ -26,14 +26,14 @@ New Calculation Types:
   1. Differential Conductance
     
 New features:
-  1.  Automatically run simple Molcas MC-PDFT calculations from pyRUQT
+  1.  Automatically run simple Molcas MC-PDFT and pySCF DFT calculations from pyRUQT for transport calculations
   2.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
   3.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
   4.  Automatic plotting of transport results in PNG format
 
 Required:
 
-Python3, Numpy, Scipy, and Matplotlib (ASE only)
+Python3, Numpy, Scipy, and Matplotlib
 
 MKL (RUQT-Fortran)
 
@@ -46,17 +46,17 @@ NEGF Transport Calculator Options. Only 1 of the following are required but both
 
 Electronic Structure Calculator Options. Only 1 of the following are required but both recommended:
 
-    OpenMolcas(sandx_fock branch) installation (can be run separately, required for NEGF-MCPDFT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
+    OpenMolcas(sandx_fock branch) installation (best run as separate calculations but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
 
     PySCF (enables non-Molcas NEGF-DFT calculations and mixed DFT/PDFT transport calculations by pyRUQT) from https://pyscf.org/
 
-Quick Installation
+Quick Installation (for now, Python package install coming in future)
 
     Put the pyruqt.py and ruqt.py files in your python module folder.
 
     Install ASE, OpenMolcas(sandx_fock branch), and optionally PySCF for all users.
 
-    Use the pyRUQT_example.py script to get started running calculations.
+    Check the examples folder for scripts to get started running calculations.
 
 If you use this code in your research please cite:
 
@@ -64,7 +64,7 @@ If you use this code in your research please cite:
 
 If you use the ASE transport engine also cite:
 
-2. Ask Hjorth Larsen et al. J. Phys.: Condens. Matter 29, 273002 (2017). https://dog.org/10.1088/1361-648X/aa680e
+2. Ask Hjorth Larsen et al. J. Phys.: Condens. Matter 29, 273002 (2017). https://doi.org/10.1088/1361-648X/aa680e
 
 If you use the RUQT-Fortran transport engine also cite:
 
