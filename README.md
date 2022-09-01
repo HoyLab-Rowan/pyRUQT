@@ -7,7 +7,7 @@ Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Funct
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
 orginial RUQT code (RUQT-Fortran) or the Atomic Simulation Engine (ASE) for transport calculations and is currently capable of performing NEGF-MCPDFT, NEGF-
-DFT (PySCF), and mixed method NEGF calculations (ex. MC-PDFT for extended molecule region and DFT for electrodes). Support for NEGF-RDM to come in furture 
+DFT (PySCF), and mixed method NEGF calculations (ex. MC-PDFT for extended molecule region and DFT for electrodes). Support for NEGF-RDM to come in future 
 (NEGF-RDM will require the Maple Quantum Chemistry Toolbox).
 
 Each currently supported NEGF engine types (ASE and RUQT-Fortran) offer a different approach to treating electrode-extended molecule interactions and coupling:
@@ -20,8 +20,10 @@ construct the Green's functions.
 Hamiltonian and Overlap matrix is used to contruct the Green's Functions which are divided by program into the electrode and extended molecule regions 
 based on number of electrode atoms specified by user.
 
+This software runs the standard Landuaer current, conductance, and zero-bias transmission calculations found in RUQT-Fortran/ASE and adds additional calculation types and features not found in either program:
+
 New Calculation Types:
-  1. Differential Conductance
+  1. Differential Conductance (using both RUQT-Fortran and ASE engines)
     
 New features:
   1.  Automatically run simple Molcas MC-PDFT and pySCF DFT calculations from pyRUQT for transport calculations
