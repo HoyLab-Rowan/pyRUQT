@@ -1,7 +1,8 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
-***Note: This is a placeholder for the release version that currently in progress. Full release of code coming later this month (August 2022)***
+
+***Update (8/31/2022): First public version of pyRUQT (v0.1) is now available. More updates and improvements to follow later this year.***
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
@@ -9,18 +10,15 @@ orginial RUQT code (RUQT-Fortran) or the Atomic Simulation Engine (ASE) for tran
 DFT (PySCF), and mixed method NEGF calculations (ex. MC-PDFT for extended molecule region and DFT for electrodes). Support for NEGF-RDM to come in furture 
 (NEGF-RDM will require the Maple Quantum Chemistry Toolbox).
 
-Each currently supported NEGF engine type (ASE and RUQT-Fortran) offers a different approach to treating electrode-extended molecule interactions and coupling:
+Each currently supported NEGF engine types (ASE and RUQT-Fortran) offer a different approach to treating electrode-extended molecule interactions and coupling:
 
-1. ASE Transport Engine: Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
+1. ASE Transport Engine (sie_negf class): Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
 interactions, and coupling (see Paper #2). Separate Hamiltonian and Overlap matrices for the extended molecule and repeating electrode blocks are used to 
 construct the Green's functions.
 
-2. RUQT-Fortran Transport Engine: Metal wide band limit approximation with user provided Fermi level and coupling constants (Papers 1 & 3). Only 1 
+2. RUQT-Fortran Transport Engine (wbl_negf class): Metal wide band limit approximation with user provided Fermi level and coupling constants (Papers 1 & 3). Only 1 
 Hamiltonian and Overlap matrix is used to contruct the Green's Functions which are divided by program into the electrode and extended molecule regions 
-based on number of electrode atoms specificed by user.
-
-This software runs the standard Landuaer current, conductance, and zero-bias transmission calculations found in RUQT-Fortran/ASE and adds additional 
-calculation types and features not found in either:
+based on number of electrode atoms specified by user.
 
 New Calculation Types:
   1. Differential Conductance
