@@ -1,0 +1,13 @@
+Using Atomic Simulation Environment to calculate electrode interactions and transport
+Running Calculation using the following paramaters:
+{'output': 'sie_example', 'exmol_prog': 'molcas', 'exmol_dir': '../exmol_example/ben/', 'elec_prog': 'molcas', 'elec_dir': '../elec_example/au_elec/', 'run_molcas': False, 'min_trans_energy': -2.0, 'max_trans_energy': 2.0, 'delta_energy': 0.001, 'min_bias': -2, 'max_bias': 2, 'delta_bias': 0.1, 'full_align': True, 'dft_functional': 'pbe', 'basis_set': 'lanl2dz', 'ecp': 'lanl2dz', 'n_elec_units': 2, 'exmol_geo': None, 'elec_geo': None, 'state_num': 1, 'state_num_e': 1, 'coupling_calc': 'none', 'coupled': 'molecule', 'spin_pol': False, 'align_elec': 0, 'dos_calc': False, 'fd_change': 0.001}
+Using Molcas calculation at ../exmol_example/ben/ for extended molecular region
+Using the effective Hamiltonian for electronic state 1 of extended mol. region
+Using Molcas calculation at ../elec_example/au_elec/ for left electrode
+Using the effective Hamiltonian for electronic state 1 of extended mol. region
+Assuming symmetric electrodes
+Reading data for state 1 out of 1 elec. states.
+Reading data for state 1 out of 1 elec. states.
+Calculating 4001 transmission energies from: 1.9999999999995595 eV to -2.0 eV
+Final transmission values will be printed to sie_example.trans in relative transmission vs eV
+Performing NEGF Transport Calculations using the Atomic Simulation Environment

@@ -69,10 +69,8 @@ class sie_negf:
                           'dos_calc'      : False,
                           'fd_change'     : 0.001} 
 
-  print("Running Calculation using the following paramaters:",file=self.input_parameters['output']+'.out')
   self.param_update(**kwargs)
-  print(self.input_parameters,file=self.input_parameters['output']+'.out')
-
+  
  def param_update(self,**kwargs):
   inp=self.input_parameters
   for key in kwargs:
@@ -84,8 +82,11 @@ class sie_negf:
  def calc_setup(self):
   inp=self.input_parameters
   outputfile=open(inp['output']+".out",'w')
-  print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes")
+  
+  print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
   print("Using Atomic Simulation Environment to calculate electrode interactions and transport",file=outputfile)
+  print("Running Calculation using the following paramaters:",file=outputfile)
+  print(self.input_parameters,file=outputfile)
   energies=np.arange(inp['min_trans_energy'],inp['max_trans_energy']+inp['delta_energy'],inp['delta_energy'])
   bias=np.arange(inp['min_bias'],inp['max_bias']+inp['delta_bias'],inp['delta_bias'])
   bias=np.where(abs(bias)<0.01, 0.01, bias)
@@ -206,10 +207,11 @@ class wbl_negf:
                           'run_molcas'  : False,
                           'min_trans_energy' : -2.0,
                           'max_trans_energy' : 2.0,
-                          'delta_energy' : 0.01,
+                          'delta_energy' : 0.01,  
                           'min_bias'     : -2,
                           'max_bias'     : 2,
                           'delta_bias'   : 0.1,
+                          'temp'         : 1E-5,
                           'dft_functional' : "pbe",
                           'basis_set'  : "lanl2dz",
                           'ecp'        : "lanl2dz",
@@ -222,9 +224,7 @@ class wbl_negf:
                           'fort_data'  : None,
                           'fort_trans' : False,
                           'fd_change'  : 0.001}
-  print("Running Calculation using the following paramaters:",file=self.input_parameters['output']+'.out')
   self.param_update(**kwargs)
-  print(self.input_parameters,file=self.input_parameters['output']+'.out')
 
  def param_update(self,**kwargs):
   inp=self.input_parameters
@@ -239,8 +239,10 @@ class wbl_negf:
   outputfile=open(inp['output']+".out",'w')
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
   print("Using RUQT-Fortran to calculate transport",file=outputfile)
-  energies=np.arange(min_trans_energy,max_trans_energy+delta_energy,delta_energy)
-  bias=np.arange(min_bias,max_bias+delta_bias,delta_bias)
+  print("Running Calculation using the following paramaters:",file=outputfile)
+  print(self.input_parameters,file=outputfile)
+  energies=np.arange(inp['min_trans_energy'],inp['max_trans_energy']+inp['delta_energy'],inp['delta_energy'])
+  bias=np.arange(inp['min_bias'],inp['max_bias']+inp['delta_bias'],inp['delta_bias'])
   bias=np.where(abs(bias)<0.01, 0.01, bias)
 
   if inp['exmol_prog']=="molcas":

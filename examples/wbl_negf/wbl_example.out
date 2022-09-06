@@ -1,0 +1,841 @@
+ Just getting started
+ Input File Read
+ Using the following parameters for the transport calculation
+ Number of OpenMP Threads:           1
+ Number of  Molecular and Atomic Orbitals:         212         212
+ Number of Active Orbitals:         212
+ Number of Occupied Orbitals:          83
+ Number of Virtual Orbitals:         129
+ Orbitals in left electrode:          46
+ Orbitals in device region:         120
+ Orbitals in right electrode:          46
+ Transmission Energy Window(eV) and dE:  -7.30000000000000     
+  -3.30000000000000       1.000000000000000E-002
+ Voltage Window and dV:  -2.00000000000000        2.00000000000000     
+  0.100000000000000     
+ Fermi Density:  7.000000000000001E-002  7.000000000000001E-002
+ KT:  8.617333262000001E-010
+ Transport Calculated for State            1
+ Reading Fock Matrix for            1
+ Done Getting HF Values
+ This run using:
+ Using Molcas Fock Matrix: FOCK_AO
+ Starting Metal WBL calculation
+ Done partitioning S Matrix
+ Done partitioning Fock Matrix
+ Getting Electrodes
+ alloc l done
+ l done
+ Sigma Calculated
+ Starting Transmission Calculation at Energy
+ Done with transmission function at energy:  0.638272719660571     
+ Done with transmission function at energy:  0.625538652221068     
+ Done with transmission function at energy:  0.612936424670464     
+ Done with transmission function at energy:  0.600476673104589     
+ Done with transmission function at energy:  0.588169012822745     
+ Done with transmission function at energy:  0.576022076609285     
+ Done with transmission function at energy:  0.564043555998609     
+ Done with transmission function at energy:  0.552240243740294     
+ Done with transmission function at energy:  0.540618078093845     
+ Done with transmission function at energy:  0.529182187609349     
+ Done with transmission function at energy:  0.517936936932105     
+ Done with transmission function at energy:  0.506885971817414     
+ Done with transmission function at energy:  0.496032264088672     
+ Done with transmission function at energy:  0.485378156220644     
+ Done with transmission function at energy:  0.474925404539045     
+ Done with transmission function at energy:  0.464675221513462     
+ Done with transmission function at energy:  0.454628316601083     
+ Done with transmission function at energy:  0.444784935907278     
+ Done with transmission function at energy:  0.435144899993854     
+ Done with transmission function at energy:  0.425707639947833     
+ Done with transmission function at energy:  0.416472232110167     
+ Done with transmission function at energy:  0.407437430926210     
+ Done with transmission function at energy:  0.398601699823467     
+ Done with transmission function at energy:  0.389963240457112     
+ Done with transmission function at energy:  0.381520020632623     
+ Done with transmission function at energy:  0.373269799756127     
+ Done with transmission function at energy:  0.365210153274328     
+ Done with transmission function at energy:  0.357338495285268     
+ Done with transmission function at energy:  0.349652099477024     
+ Done with transmission function at energy:  0.342148118733821     
+ Done with transmission function at energy:  0.334823603126877     
+ Done with transmission function at energy:  0.327675516960634     
+ Done with transmission function at energy:  0.320700753829339     
+ Done with transmission function at energy:  0.313896151211310     
+ Done with transmission function at energy:  0.307258503209331     
+ Done with transmission function at energy:  0.300784572729349     
+ Done with transmission function at energy:  0.294471102418345     
+ Done with transmission function at energy:  0.288314824486253     
+ Done with transmission function at energy:  0.282312469991506     
+ Done with transmission function at energy:  0.276460777000453     
+ Done with transmission function at energy:  0.270756498033675     
+ Done with transmission function at energy:  0.265196407038260     
+ Done with transmission function at energy:  0.259777305394748     
+ Done with transmission function at energy:  0.254496027374456     
+ Done with transmission function at energy:  0.249349445274725     
+ Done with transmission function at energy:  0.244334473893131     
+ Done with transmission function at energy:  0.239448074491111     
+ Done with transmission function at energy:  0.234687258492913     
+ Done with transmission function at energy:  0.230049090844805     
+ Done with transmission function at energy:  0.225530692948470     
+ Done with transmission function at energy:  0.221129245383473     
+ Done with transmission function at energy:  0.216841990446072     
+ Done with transmission function at energy:  0.212666234614238     
+ Done with transmission function at energy:  0.208599350559544     
+ Done with transmission function at energy:  0.204638779491395     
+ Done with transmission function at energy:  0.200782033205869     
+ Done with transmission function at energy:  0.197026696179565     
+ Done with transmission function at energy:  0.193370427917522     
+ Done with transmission function at energy:  0.189810965217637     
+ Done with transmission function at energy:  0.186346124858484     
+ Done with transmission function at energy:  0.182973806415014     
+ Done with transmission function at energy:  0.179691995549337     
+ Done with transmission function at energy:  0.176498767829343     
+ Done with transmission function at energy:  0.173392292974459     
+ Done with transmission function at energy:  0.170370840177733     
+ Done with transmission function at energy:  0.167432784050200     
+ Done with transmission function at energy:  0.164576611999873     
+ Done with transmission function at energy:  0.161800932801859     
+ Done with transmission function at energy:  0.159104487209638     
+ Done with transmission function at energy:  0.156486160437178     
+ Done with transmission function at energy:  0.153944997592071     
+ Done with transmission function at energy:  0.151480222221470     
+ Done with transmission function at energy:  0.149091259313185     
+ Done with transmission function at energy:  0.146777763148948     
+ Done with transmission function at energy:  0.144539652164047     
+ Done with transmission function at energy:  0.142377151755059     
+ Done with transmission function at energy:  0.140290848220474     
+ Done with transmission function at energy:  0.138281756143329     
+ Done with transmission function at energy:  0.136351403995678     
+ Done with transmission function at energy:  0.134501943010634     
+ Done with transmission function at energy:  0.132736287292787     
+ Done with transmission function at energy:  0.131058295472469     
+ Done with transmission function at energy:  0.129473008427223     
+ Done with transmission function at energy:  0.127986963843027     
+ Done with transmission function at energy:  0.126608616893238     
+ Done with transmission function at energy:  0.125348910110767     
+ Done with transmission function at energy:  0.124222055289029     
+ Done with transmission function at energy:  0.123246622968993     
+ Done with transmission function at energy:  0.122447083986655     
+ Done with transmission function at energy:  0.121856030624676     
+ Done with transmission function at energy:  0.121517439718264     
+ Done with transmission function at energy:  0.121491571038180     
+ Done with transmission function at energy:  0.121862500198723     
+ Done with transmission function at energy:  0.122750018098519     
+ Done with transmission function at energy:  0.124329001655077     
+ Done with transmission function at energy:  0.126862029004846     
+ Done with transmission function at energy:  0.130756408971631     
+ Done with transmission function at energy:  0.136668182237493     
+ Done with transmission function at energy:  0.145700663845348     
+ Done with transmission function at energy:  0.159801674744700     
+ Done with transmission function at energy:  0.182590056301103     
+ Done with transmission function at energy:  0.221076531590349     
+ Done with transmission function at energy:  0.288667801450235     
+ Done with transmission function at energy:  0.404464236139363     
+ Done with transmission function at energy:  0.549065356396641     
+ Done with transmission function at energy:  0.567365934461423     
+ Done with transmission function at energy:  0.426049503145588     
+ Done with transmission function at energy:  0.295091309600458     
+ Done with transmission function at energy:  0.216725167923550     
+ Done with transmission function at energy:  0.171970416391620     
+ Done with transmission function at energy:  0.145176158309120     
+ Done with transmission function at energy:  0.128104881609754     
+ Done with transmission function at energy:  0.116575309924240     
+ Done with transmission function at energy:  0.108382317111500     
+ Done with transmission function at energy:  0.102300855723404     
+ Done with transmission function at energy:  9.761504173230462E-002
+ Done with transmission function at energy:  9.388709621174413E-002
+ Done with transmission function at energy:  9.083843841764944E-002
+ Done with transmission function at energy:  8.828553583751253E-002
+ Done with transmission function at energy:  8.610375536628939E-002
+ Done with transmission function at energy:  8.420618013477915E-002
+ Done with transmission function at energy:  8.253075505631779E-002
+ Done with transmission function at energy:  8.103223981986665E-002
+ Done with transmission function at energy:  7.967703003408688E-002
+ Done with transmission function at energy:  7.843974004612408E-002
+ Done with transmission function at energy:  7.730089745431204E-002
+ Done with transmission function at energy:  7.624535603951799E-002
+ Done with transmission function at energy:  7.526118303317994E-002
+ Done with transmission function at energy:  7.433886595719127E-002
+ Done with transmission function at energy:  7.347073861947218E-002
+ Done with transmission function at energy:  7.265055995212549E-002
+ Done with transmission function at energy:  7.187320093202468E-002
+ Done with transmission function at energy:  7.113440916276381E-002
+ Done with transmission function at energy:  7.043062995872826E-002
+ Done with transmission function at energy:  6.975886891569844E-002
+ Done with transmission function at energy:  6.911658537710835E-002
+ Done with transmission function at energy:  6.850160917384804E-002
+ Done with transmission function at energy:  6.791207502070706E-002
+ Done with transmission function at energy:  6.734637040386160E-002
+ Done with transmission function at energy:  6.680309386082345E-002
+ Done with transmission function at energy:  6.628102151892917E-002
+ Done with transmission function at energy:  6.577907990324167E-002
+ Done with transmission function at energy:  6.529632387657330E-002
+ Done with transmission function at energy:  6.483191857178602E-002
+ Done with transmission function at energy:  6.438512451163519E-002
+ Done with transmission function at energy:  6.395528544103493E-002
+ Done with transmission function at energy:  6.354181817256396E-002
+ Done with transmission function at energy:  6.314420422186040E-002
+ Done with transmission function at energy:  6.276198282143178E-002
+ Done with transmission function at energy:  6.239474523501298E-002
+ Done with transmission function at energy:  6.204212991451782E-002
+ Done with transmission function at energy:  6.170381859580437E-002
+ Done with transmission function at energy:  6.137953307502816E-002
+ Done with transmission function at energy:  6.106903259222338E-002
+ Done with transmission function at energy:  6.077211175817634E-002
+ Done with transmission function at energy:  6.048859896609804E-002
+ Done with transmission function at energy:  6.021835517473784E-002
+ Done with transmission function at energy:  5.996127310306382E-002
+ Done with transmission function at energy:  5.971727682465924E-002
+ Done with transmission function at energy:  5.948632154955594E-002
+ Done with transmission function at energy:  5.926839393042059E-002
+ Done with transmission function at energy:  5.906351248126057E-002
+ Done with transmission function at energy:  5.887172846702457E-002
+ Done with transmission function at energy:  5.869312696132882E-002
+ Done with transmission function at energy:  5.852782839639237E-002
+ Done with transmission function at energy:  5.837599034459068E-002
+ Done with transmission function at energy:  5.823780969974554E-002
+ Done with transmission function at energy:  5.811352530444244E-002
+ Done with transmission function at energy:  5.800342096676372E-002
+ Done with transmission function at energy:  5.790782903360515E-002
+ Done with transmission function at energy:  5.782713445181992E-002
+ Done with transmission function at energy:  5.776177949816522E-002
+ Done with transmission function at energy:  5.771226920274034E-002
+ Done with transmission function at energy:  5.767917757889697E-002
+ Done with transmission function at energy:  5.766315476293409E-002
+ Done with transmission function at energy:  5.766493522326605E-002
+ Done with transmission function at energy:  5.768534722943285E-002
+ Done with transmission function at energy:  5.772532368200942E-002
+ Done with transmission function at energy:  5.778591463293434E-002
+ Done with transmission function at energy:  5.786830179010249E-002
+ Done with transmission function at energy:  5.797381521693128E-002
+ Done with transmission function at energy:  5.810395277737922E-002
+ Done with transmission function at energy:  5.826040273820221E-002
+ Done with transmission function at energy:  5.844507012719015E-002
+ Done with transmission function at energy:  5.866010759614033E-002
+ Done with transmission function at energy:  5.890795168787824E-002
+ Done with transmission function at energy:  5.919136546772055E-002
+ Done with transmission function at energy:  5.951348907697138E-002
+ Done with transmission function at energy:  5.987789962295308E-002
+ Done with transmission function at energy:  6.028868265885245E-002
+ Done with transmission function at energy:  6.075051768566822E-002
+ Done with transmission function at energy:  6.126878103766623E-002
+ Done with transmission function at energy:  6.184967014690924E-002
+ Done with transmission function at energy:  6.250035445481818E-002
+ Done with transmission function at energy:  6.322915974437403E-002
+ Done with transmission function at energy:  6.404579430251935E-002
+ Done with transmission function at energy:  6.496162838058936E-002
+ Done with transmission function at energy:  6.599004138527462E-002
+ Done with transmission function at energy:  6.714685630975051E-002
+ Done with transmission function at energy:  6.845088695707044E-002
+ Done with transmission function at energy:  6.992463254472650E-002
+ Done with transmission function at energy:  7.159516623983966E-002
+ Done with transmission function at energy:  7.349528140561515E-002
+ Done with transmission function at energy:  7.566498350154616E-002
+ Done with transmission function at energy:  7.815345036246793E-002
+ Done with transmission function at energy:  8.102163392217457E-002
+ Done with transmission function at energy:  8.434575062462918E-002
+ Done with transmission function at energy:  8.822201754443044E-002
+ Done with transmission function at energy:  9.277315709189501E-002
+ Done with transmission function at energy:  9.815744537598554E-002
+ Done with transmission function at energy:  0.104581469022236     
+ Done with transmission function at energy:  0.112318362701813     
+ Done with transmission function at energy:  0.121734255773577     
+ Done with transmission function at energy:  0.133327166072574     
+ Done with transmission function at energy:  0.147784948757616     
+ Done with transmission function at energy:  0.166072534242426     
+ Done with transmission function at energy:  0.189563846977321     
+ Done with transmission function at energy:  0.220239675408121     
+ Done with transmission function at energy:  0.260973816787862     
+ Done with transmission function at energy:  0.315903283512949     
+ Done with transmission function at energy:  0.390745092698140     
+ Done with transmission function at energy:  0.492444341944855     
+ Done with transmission function at energy:  0.626189561252224     
+ Done with transmission function at energy:  0.785535180703595     
+ Done with transmission function at energy:  0.934064039360513     
+ Done with transmission function at energy:   1.00287740285659     
+ Done with transmission function at energy:  0.947759337283322     
+ Done with transmission function at energy:  0.805255335446579     
+ Done with transmission function at energy:  0.645304866417036     
+ Done with transmission function at energy:  0.508461928614753     
+ Done with transmission function at energy:  0.403546523323065     
+ Done with transmission function at energy:  0.326087202338952     
+ Done with transmission function at energy:  0.269181663301534     
+ Done with transmission function at energy:  0.226983416280215     
+ Done with transmission function at energy:  0.195218687149971     
+ Done with transmission function at energy:  0.170907017121629     
+ Done with transmission function at energy:  0.151991405929037     
+ Done with transmission function at energy:  0.137044904223371     
+ Done with transmission function at energy:  0.125065790967632     
+ Done with transmission function at energy:  0.115340488694547     
+ Done with transmission function at energy:  0.107352776408499     
+ Done with transmission function at energy:  0.100723464767787     
+ Done with transmission function at energy:  9.516991931787733E-002
+ Done with transmission function at energy:  9.047855367814650E-002
+ Done with transmission function at energy:  8.648587501639390E-002
+ Done with transmission function at energy:  8.306523645775271E-002
+ Done with transmission function at energy:  8.011744857575835E-002
+ Done with transmission function at energy:  7.756403604393973E-002
+ Done with transmission function at energy:  7.534233211919310E-002
+ Done with transmission function at energy:  7.340186680765935E-002
+ Done with transmission function at energy:  7.170167744917838E-002
+ Done with transmission function at energy:  7.020828478177214E-002
+ Done with transmission function at energy:  6.889415483264824E-002
+ Done with transmission function at energy:  6.773651938606556E-002
+ Done with transmission function at energy:  6.671646379671786E-002
+ Done with transmission function at energy:  6.581821635308278E-002
+ Done with transmission function at energy:  6.502859089376935E-002
+ Done with transmission function at energy:  6.433654721008518E-002
+ Done with transmission function at energy:  6.373284286200734E-002
+ Done with transmission function at energy:  6.320975662204335E-002
+ Done with transmission function at energy:  6.276086867661966E-002
+ Done with transmission function at energy:  6.238088639536008E-002
+ Done with transmission function at energy:  6.206550716426073E-002
+ Done with transmission function at energy:  6.181131188352035E-002
+ Done with transmission function at energy:  6.161568441600964E-002
+ Done with transmission function at energy:  6.147675352898409E-002
+ Done with transmission function at energy:  6.139335496818897E-002
+ Done with transmission function at energy:  6.136501221911155E-002
+ Done with transmission function at energy:  6.139193538144178E-002
+ Done with transmission function at energy:  6.147503832931039E-002
+ Done with transmission function at energy:  6.161597524984348E-002
+ Done with transmission function at energy:  6.181719848819903E-002
+ Done with transmission function at energy:  6.208204075957555E-002
+ Done with transmission function at energy:  6.241482604844654E-002
+ Done with transmission function at energy:  6.282101518735815E-002
+ Done with transmission function at energy:  6.330739420928717E-002
+ Done with transmission function at energy:  6.388231644599487E-002
+ Done with transmission function at energy:  6.455601304437363E-002
+ Done with transmission function at energy:  6.534099179364972E-002
+ Done with transmission function at energy:  6.625255133689620E-002
+ Done with transmission function at energy:  6.730944770511837E-002
+ Done with transmission function at energy:  6.853476434838568E-002
+ Done with transmission function at energy:  6.995705693276463E-002
+ Done with transmission function at energy:  7.161187348828441E-002
+ Done with transmission function at energy:  7.354379337417422E-002
+ Done with transmission function at energy:  7.580919234753372E-002
+ Done with transmission function at energy:  7.848003696532721E-002
+ Done with transmission function at energy:  8.164915831476177E-002
+ Done with transmission function at energy:  8.543768185111994E-002
+ Done with transmission function at energy:  9.000564608547762E-002
+ Done with transmission function at energy:  9.556740755154340E-002
+ Done with transmission function at energy:  0.102414334281247     
+ Done with transmission function at energy:  0.110948744734559     
+ Done with transmission function at energy:  0.121735372054244     
+ Done with transmission function at energy:  0.135580229598561     
+ Done with transmission function at energy:  0.153651842035334     
+ Done with transmission function at energy:  0.177665123245297     
+ Done with transmission function at energy:  0.210145960776483     
+ Done with transmission function at energy:  0.254752868250033     
+ Done with transmission function at energy:  0.316439312094570     
+ Done with transmission function at energy:  0.400574395637513     
+ Done with transmission function at energy:  0.508462501159887     
+ Done with transmission function at energy:  0.625354057281249     
+ Done with transmission function at energy:  0.707529898500477     
+ Done with transmission function at energy:  0.705070442639613     
+ Done with transmission function at energy:  0.620977727252665     
+ Done with transmission function at energy:  0.506473685624114     
+ Done with transmission function at energy:  0.402226277242404     
+ Done with transmission function at energy:  0.320985360941316     
+ Done with transmission function at energy:  0.261102129124030     
+ Done with transmission function at energy:  0.217461036656250     
+ Done with transmission function at energy:  0.185411360726121     
+ Done with transmission function at energy:  0.161513940476068     
+ Done with transmission function at energy:  0.143380997276211     
+ Done with transmission function at energy:  0.129380019541910     
+ Done with transmission function at energy:  0.118390469256665     
+ Done with transmission function at energy:  0.109633827002051     
+ Done with transmission function at energy:  0.102560791760752     
+ Done with transmission function at energy:  9.677739004293312E-002
+ Done with transmission function at energy:  9.199643028509519E-002
+ Done with transmission function at energy:  8.800528077905367E-002
+ Done with transmission function at energy:  8.464419160627240E-002
+ Done with transmission function at energy:  8.179149320526122E-002
+ Done with transmission function at energy:  7.935333724918067E-002
+ Done with transmission function at energy:  7.725648038647998E-002
+ Done with transmission function at energy:  7.544313597791177E-002
+ Done with transmission function at energy:  7.386725139616493E-002
+ Done with transmission function at energy:  7.249178173783973E-002
+ Done with transmission function at energy:  7.128666919964070E-002
+ Done with transmission function at energy:  7.022732854845838E-002
+ Done with transmission function at energy:  6.929349989314529E-002
+ Done with transmission function at energy:  6.846837104478581E-002
+ Done with transmission function at energy:  6.773789982764676E-002
+ Done with transmission function at energy:  6.709028623081140E-002
+ Done with transmission function at energy:  6.651555784523339E-002
+ Done with transmission function at energy:  6.600524179753671E-002
+ Done with transmission function at energy:  6.555210318214603E-002
+ Done with transmission function at energy:  6.514993512439618E-002
+ Done with transmission function at energy:  6.479338915880892E-002
+ Done with transmission function at energy:  6.447783734446760E-002
+ Done with transmission function at energy:  6.419925953694192E-002
+ Done with transmission function at energy:  6.395415069830161E-002
+ Done with transmission function at energy:  6.373944431358136E-002
+ Done with transmission function at energy:  6.355244876079050E-002
+ Done with transmission function at energy:  6.339079424779863E-002
+ Done with transmission function at energy:  6.325238830659860E-002
+ Done with transmission function at energy:  6.313537833275389E-002
+ Done with transmission function at energy:  6.303811994553443E-002
+ Done with transmission function at energy:  6.295915010625772E-002
+ Done with transmission function at energy:  6.289716425752362E-002
+ Done with transmission function at energy:  6.285099675812825E-002
+ Done with transmission function at energy:  6.281960412206440E-002
+ Done with transmission function at energy:  6.280205059242959E-002
+ Done with transmission function at energy:  6.279749569027801E-002
+ Done with transmission function at energy:  6.280518343239100E-002
+ Done with transmission function at energy:  6.282443298567844E-002
+ Done with transmission function at energy:  6.285463051971107E-002
+ Done with transmission function at energy:  6.289522210342044E-002
+ Done with transmission function at energy:  6.294570749456765E-002
+ Done with transmission function at energy:  6.300563467628115E-002
+ Done with transmission function at energy:  6.307459508877152E-002
+ Done with transmission function at energy:  6.315221939199772E-002
+ Done with transmission function at energy:  6.323817374955910E-002
+ Done with transmission function at energy:  6.333215654929911E-002
+ Done with transmission function at energy:  6.343389547107031E-002
+ Done with transmission function at energy:  6.354314490830261E-002
+ Done with transmission function at energy:  6.365968366941546E-002
+ Done with transmission function at energy:  6.378331292987297E-002
+ Done with transmission function at energy:  6.391385442057007E-002
+ Done with transmission function at energy:  6.405114877554408E-002
+ Done with transmission function at energy:  6.419505410659372E-002
+ Done with transmission function at energy:  6.434544468937492E-002
+ Done with transmission function at energy:  6.450220980459476E-002
+ Done with transmission function at energy:  6.466525269937073E-002
+ Done with transmission function at energy:  6.483448965316926E-002
+ Done with transmission function at energy:  6.500984913930463E-002
+ Done with transmission function at energy:  6.519127109063994E-002
+ Done with transmission function at energy:  6.537870621436143E-002
+ Done with transmission function at energy:  6.557211540490375E-002
+ Done with transmission function at energy:  6.577146919716335E-002
+ Done with transmission function at energy:  6.597674730340926E-002
+ Done with transmission function at energy:  6.618793817885284E-002
+ Done with transmission function at energy:  6.640503864008625E-002
+ Done with transmission function at energy:  6.662805353823971E-002
+ Done with transmission function at energy:  6.685699545597712E-002
+ Done with transmission function at energy:  6.709188446165695E-002
+ Done with transmission function at energy:  6.733274786864450E-002
+ Done with transmission function at energy:  6.757962005209818E-002
+ Done with transmission function at energy:  6.783254228010575E-002
+ Done with transmission function at energy:  6.809156257577545E-002
+ Done with transmission function at energy:  6.835673559813724E-002
+ Done with transmission function at energy:  6.862812256299662E-002
+ Done with transmission function at energy:  6.890579116675254E-002
+ Done with transmission function at energy:  6.918981554144020E-002
+ Done with transmission function at energy:  6.948027622905747E-002
+ Done with transmission function at energy:  6.977726017525061E-002
+ Done with transmission function at energy:  7.008086073701275E-002
+ Done with transmission function at energy:  7.039117771340778E-002
+ Done with transmission function at energy:  7.070831738958291E-002
+ Done with transmission function at energy:  7.103239260587171E-002
+ Transm vs Energy curve  -7.300000      0.6382727    
+ Transm vs Energy curve  -7.290000      0.6255386    
+ Transm vs Energy curve  -7.280000      0.6129364    
+ Transm vs Energy curve  -7.270000      0.6004767    
+ Transm vs Energy curve  -7.260000      0.5881690    
+ Transm vs Energy curve  -7.250000      0.5760221    
+ Transm vs Energy curve  -7.240000      0.5640436    
+ Transm vs Energy curve  -7.230000      0.5522403    
+ Transm vs Energy curve  -7.220000      0.5406181    
+ Transm vs Energy curve  -7.210000      0.5291822    
+ Transm vs Energy curve  -7.200000      0.5179369    
+ Transm vs Energy curve  -7.190000      0.5068859    
+ Transm vs Energy curve  -7.180000      0.4960323    
+ Transm vs Energy curve  -7.170000      0.4853781    
+ Transm vs Energy curve  -7.160000      0.4749254    
+ Transm vs Energy curve  -7.150000      0.4646752    
+ Transm vs Energy curve  -7.140000      0.4546283    
+ Transm vs Energy curve  -7.130000      0.4447849    
+ Transm vs Energy curve  -7.120000      0.4351449    
+ Transm vs Energy curve  -7.110000      0.4257076    
+ Transm vs Energy curve  -7.100000      0.4164722    
+ Transm vs Energy curve  -7.090000      0.4074374    
+ Transm vs Energy curve  -7.080000      0.3986017    
+ Transm vs Energy curve  -7.070000      0.3899632    
+ Transm vs Energy curve  -7.060000      0.3815200    
+ Transm vs Energy curve  -7.050000      0.3732698    
+ Transm vs Energy curve  -7.040000      0.3652101    
+ Transm vs Energy curve  -7.030000      0.3573385    
+ Transm vs Energy curve  -7.020000      0.3496521    
+ Transm vs Energy curve  -7.010000      0.3421481    
+ Transm vs Energy curve  -7.000000      0.3348236    
+ Transm vs Energy curve  -6.990000      0.3276755    
+ Transm vs Energy curve  -6.980000      0.3207008    
+ Transm vs Energy curve  -6.970000      0.3138961    
+ Transm vs Energy curve  -6.960000      0.3072585    
+ Transm vs Energy curve  -6.950000      0.3007846    
+ Transm vs Energy curve  -6.940000      0.2944711    
+ Transm vs Energy curve  -6.930000      0.2883148    
+ Transm vs Energy curve  -6.920000      0.2823125    
+ Transm vs Energy curve  -6.910000      0.2764608    
+ Transm vs Energy curve  -6.900000      0.2707565    
+ Transm vs Energy curve  -6.890000      0.2651964    
+ Transm vs Energy curve  -6.880000      0.2597773    
+ Transm vs Energy curve  -6.870000      0.2544960    
+ Transm vs Energy curve  -6.860000      0.2493494    
+ Transm vs Energy curve  -6.850000      0.2443345    
+ Transm vs Energy curve  -6.840000      0.2394481    
+ Transm vs Energy curve  -6.830000      0.2346873    
+ Transm vs Energy curve  -6.820000      0.2300491    
+ Transm vs Energy curve  -6.810000      0.2255307    
+ Transm vs Energy curve  -6.800000      0.2211292    
+ Transm vs Energy curve  -6.790000      0.2168420    
+ Transm vs Energy curve  -6.780000      0.2126662    
+ Transm vs Energy curve  -6.770000      0.2085993    
+ Transm vs Energy curve  -6.760000      0.2046388    
+ Transm vs Energy curve  -6.750000      0.2007820    
+ Transm vs Energy curve  -6.740000      0.1970267    
+ Transm vs Energy curve  -6.730000      0.1933704    
+ Transm vs Energy curve  -6.720000      0.1898110    
+ Transm vs Energy curve  -6.710000      0.1863461    
+ Transm vs Energy curve  -6.700000      0.1829738    
+ Transm vs Energy curve  -6.690000      0.1796920    
+ Transm vs Energy curve  -6.680000      0.1764988    
+ Transm vs Energy curve  -6.670000      0.1733923    
+ Transm vs Energy curve  -6.660000      0.1703708    
+ Transm vs Energy curve  -6.650000      0.1674328    
+ Transm vs Energy curve  -6.640000      0.1645766    
+ Transm vs Energy curve  -6.630000      0.1618009    
+ Transm vs Energy curve  -6.620000      0.1591045    
+ Transm vs Energy curve  -6.610000      0.1564862    
+ Transm vs Energy curve  -6.600000      0.1539450    
+ Transm vs Energy curve  -6.590000      0.1514802    
+ Transm vs Energy curve  -6.580000      0.1490913    
+ Transm vs Energy curve  -6.570000      0.1467778    
+ Transm vs Energy curve  -6.560000      0.1445397    
+ Transm vs Energy curve  -6.550000      0.1423772    
+ Transm vs Energy curve  -6.540000      0.1402908    
+ Transm vs Energy curve  -6.530000      0.1382818    
+ Transm vs Energy curve  -6.520000      0.1363514    
+ Transm vs Energy curve  -6.510000      0.1345019    
+ Transm vs Energy curve  -6.500000      0.1327363    
+ Transm vs Energy curve  -6.490000      0.1310583    
+ Transm vs Energy curve  -6.480000      0.1294730    
+ Transm vs Energy curve  -6.470000      0.1279870    
+ Transm vs Energy curve  -6.460000      0.1266086    
+ Transm vs Energy curve  -6.450000      0.1253489    
+ Transm vs Energy curve  -6.440000      0.1242221    
+ Transm vs Energy curve  -6.430000      0.1232466    
+ Transm vs Energy curve  -6.420000      0.1224471    
+ Transm vs Energy curve  -6.410000      0.1218560    
+ Transm vs Energy curve  -6.400000      0.1215174    
+ Transm vs Energy curve  -6.390000      0.1214916    
+ Transm vs Energy curve  -6.380000      0.1218625    
+ Transm vs Energy curve  -6.370000      0.1227500    
+ Transm vs Energy curve  -6.360000      0.1243290    
+ Transm vs Energy curve  -6.350000      0.1268620    
+ Transm vs Energy curve  -6.340000      0.1307564    
+ Transm vs Energy curve  -6.330000      0.1366682    
+ Transm vs Energy curve  -6.320000      0.1457007    
+ Transm vs Energy curve  -6.310000      0.1598017    
+ Transm vs Energy curve  -6.300000      0.1825901    
+ Transm vs Energy curve  -6.290000      0.2210765    
+ Transm vs Energy curve  -6.280000      0.2886678    
+ Transm vs Energy curve  -6.270000      0.4044642    
+ Transm vs Energy curve  -6.260000      0.5490654    
+ Transm vs Energy curve  -6.250000      0.5673659    
+ Transm vs Energy curve  -6.240000      0.4260495    
+ Transm vs Energy curve  -6.230000      0.2950913    
+ Transm vs Energy curve  -6.220000      0.2167252    
+ Transm vs Energy curve  -6.210000      0.1719704    
+ Transm vs Energy curve  -6.200000      0.1451762    
+ Transm vs Energy curve  -6.190000      0.1281049    
+ Transm vs Energy curve  -6.180000      0.1165753    
+ Transm vs Energy curve  -6.170000      0.1083823    
+ Transm vs Energy curve  -6.160000      0.1023009    
+ Transm vs Energy curve  -6.150000      9.7615041E-02
+ Transm vs Energy curve  -6.140000      9.3887098E-02
+ Transm vs Energy curve  -6.130000      9.0838440E-02
+ Transm vs Energy curve  -6.120000      8.8285536E-02
+ Transm vs Energy curve  -6.110000      8.6103752E-02
+ Transm vs Energy curve  -6.100000      8.4206179E-02
+ Transm vs Energy curve  -6.090000      8.2530752E-02
+ Transm vs Energy curve  -6.080000      8.1032239E-02
+ Transm vs Energy curve  -6.070000      7.9677030E-02
+ Transm vs Energy curve  -6.060000      7.8439742E-02
+ Transm vs Energy curve  -6.050000      7.7300899E-02
+ Transm vs Energy curve  -6.040000      7.6245353E-02
+ Transm vs Energy curve  -6.030000      7.5261183E-02
+ Transm vs Energy curve  -6.020000      7.4338868E-02
+ Transm vs Energy curve  -6.010000      7.3470742E-02
+ Transm vs Energy curve  -6.000000      7.2650559E-02
+ Transm vs Energy curve  -5.990000      7.1873203E-02
+ Transm vs Energy curve  -5.980000      7.1134411E-02
+ Transm vs Energy curve  -5.970000      7.0430629E-02
+ Transm vs Energy curve  -5.960000      6.9758870E-02
+ Transm vs Energy curve  -5.950000      6.9116585E-02
+ Transm vs Energy curve  -5.940000      6.8501607E-02
+ Transm vs Energy curve  -5.930000      6.7912072E-02
+ Transm vs Energy curve  -5.920000      6.7346372E-02
+ Transm vs Energy curve  -5.910000      6.6803090E-02
+ Transm vs Energy curve  -5.900000      6.6281021E-02
+ Transm vs Energy curve  -5.890000      6.5779082E-02
+ Transm vs Energy curve  -5.880000      6.5296322E-02
+ Transm vs Energy curve  -5.870000      6.4831920E-02
+ Transm vs Energy curve  -5.860000      6.4385124E-02
+ Transm vs Energy curve  -5.850000      6.3955285E-02
+ Transm vs Energy curve  -5.840000      6.3541815E-02
+ Transm vs Energy curve  -5.830000      6.3144207E-02
+ Transm vs Energy curve  -5.820000      6.2761985E-02
+ Transm vs Energy curve  -5.810000      6.2394746E-02
+ Transm vs Energy curve  -5.800000      6.2042128E-02
+ Transm vs Energy curve  -5.790000      6.1703820E-02
+ Transm vs Energy curve  -5.780000      6.1379533E-02
+ Transm vs Energy curve  -5.770000      6.1069034E-02
+ Transm vs Energy curve  -5.760000      6.0772114E-02
+ Transm vs Energy curve  -5.750000      6.0488600E-02
+ Transm vs Energy curve  -5.740000      6.0218357E-02
+ Transm vs Energy curve  -5.730000      5.9961274E-02
+ Transm vs Energy curve  -5.720000      5.9717275E-02
+ Transm vs Energy curve  -5.710000      5.9486322E-02
+ Transm vs Energy curve  -5.700000      5.9268393E-02
+ Transm vs Energy curve  -5.690000      5.9063513E-02
+ Transm vs Energy curve  -5.680000      5.8871727E-02
+ Transm vs Energy curve  -5.670000      5.8693126E-02
+ Transm vs Energy curve  -5.660000      5.8527827E-02
+ Transm vs Energy curve  -5.650000      5.8375992E-02
+ Transm vs Energy curve  -5.640000      5.8237810E-02
+ Transm vs Energy curve  -5.630000      5.8113527E-02
+ Transm vs Energy curve  -5.620000      5.8003422E-02
+ Transm vs Energy curve  -5.610000      5.7907827E-02
+ Transm vs Energy curve  -5.600000      5.7827134E-02
+ Transm vs Energy curve  -5.590000      5.7761781E-02
+ Transm vs Energy curve  -5.580000      5.7712268E-02
+ Transm vs Energy curve  -5.570000      5.7679176E-02
+ Transm vs Energy curve  -5.560000      5.7663154E-02
+ Transm vs Energy curve  -5.550000      5.7664935E-02
+ Transm vs Energy curve  -5.540000      5.7685345E-02
+ Transm vs Energy curve  -5.530000      5.7725325E-02
+ Transm vs Energy curve  -5.520000      5.7785913E-02
+ Transm vs Energy curve  -5.510000      5.7868302E-02
+ Transm vs Energy curve  -5.500000      5.7973817E-02
+ Transm vs Energy curve  -5.490000      5.8103953E-02
+ Transm vs Energy curve  -5.480000      5.8260404E-02
+ Transm vs Energy curve  -5.470000      5.8445070E-02
+ Transm vs Energy curve  -5.460000      5.8660109E-02
+ Transm vs Energy curve  -5.450000      5.8907952E-02
+ Transm vs Energy curve  -5.440000      5.9191365E-02
+ Transm vs Energy curve  -5.430000      5.9513491E-02
+ Transm vs Energy curve  -5.420000      5.9877899E-02
+ Transm vs Energy curve  -5.410000      6.0288683E-02
+ Transm vs Energy curve  -5.400000      6.0750518E-02
+ Transm vs Energy curve  -5.390000      6.1268780E-02
+ Transm vs Energy curve  -5.380000      6.1849669E-02
+ Transm vs Energy curve  -5.370000      6.2500358E-02
+ Transm vs Energy curve  -5.360000      6.3229159E-02
+ Transm vs Energy curve  -5.350000      6.4045794E-02
+ Transm vs Energy curve  -5.340000      6.4961627E-02
+ Transm vs Energy curve  -5.330000      6.5990038E-02
+ Transm vs Energy curve  -5.320000      6.7146853E-02
+ Transm vs Energy curve  -5.310000      6.8450890E-02
+ Transm vs Energy curve  -5.300000      6.9924630E-02
+ Transm vs Energy curve  -5.290000      7.1595170E-02
+ Transm vs Energy curve  -5.280000      7.3495284E-02
+ Transm vs Energy curve  -5.270000      7.5664982E-02
+ Transm vs Energy curve  -5.260000      7.8153454E-02
+ Transm vs Energy curve  -5.250000      8.1021637E-02
+ Transm vs Energy curve  -5.240000      8.4345751E-02
+ Transm vs Energy curve  -5.230000      8.8222019E-02
+ Transm vs Energy curve  -5.220000      9.2773154E-02
+ Transm vs Energy curve  -5.210000      9.8157443E-02
+ Transm vs Energy curve  -5.200000      0.1045815    
+ Transm vs Energy curve  -5.190000      0.1123184    
+ Transm vs Energy curve  -5.180000      0.1217343    
+ Transm vs Energy curve  -5.170000      0.1333272    
+ Transm vs Energy curve  -5.160000      0.1477849    
+ Transm vs Energy curve  -5.150000      0.1660725    
+ Transm vs Energy curve  -5.140000      0.1895638    
+ Transm vs Energy curve  -5.130000      0.2202397    
+ Transm vs Energy curve  -5.120000      0.2609738    
+ Transm vs Energy curve  -5.110000      0.3159033    
+ Transm vs Energy curve  -5.100000      0.3907451    
+ Transm vs Energy curve  -5.090000      0.4924443    
+ Transm vs Energy curve  -5.080000      0.6261896    
+ Transm vs Energy curve  -5.070000      0.7855352    
+ Transm vs Energy curve  -5.060000      0.9340640    
+ Transm vs Energy curve  -5.050000       1.002877    
+ Transm vs Energy curve  -5.040000      0.9477593    
+ Transm vs Energy curve  -5.030000      0.8052554    
+ Transm vs Energy curve  -5.020000      0.6453049    
+ Transm vs Energy curve  -5.010000      0.5084620    
+ Transm vs Energy curve  -5.000000      0.4035465    
+ Transm vs Energy curve  -4.990000      0.3260872    
+ Transm vs Energy curve  -4.980000      0.2691817    
+ Transm vs Energy curve  -4.970000      0.2269834    
+ Transm vs Energy curve  -4.960000      0.1952187    
+ Transm vs Energy curve  -4.950000      0.1709070    
+ Transm vs Energy curve  -4.940000      0.1519914    
+ Transm vs Energy curve  -4.930000      0.1370449    
+ Transm vs Energy curve  -4.920000      0.1250658    
+ Transm vs Energy curve  -4.910000      0.1153405    
+ Transm vs Energy curve  -4.900000      0.1073528    
+ Transm vs Energy curve  -4.890000      0.1007235    
+ Transm vs Energy curve  -4.880000      9.5169917E-02
+ Transm vs Energy curve  -4.870000      9.0478554E-02
+ Transm vs Energy curve  -4.860000      8.6485878E-02
+ Transm vs Energy curve  -4.850000      8.3065234E-02
+ Transm vs Energy curve  -4.840000      8.0117449E-02
+ Transm vs Energy curve  -4.830000      7.7564038E-02
+ Transm vs Energy curve  -4.820000      7.5342335E-02
+ Transm vs Energy curve  -4.810000      7.3401868E-02
+ Transm vs Energy curve  -4.800000      7.1701676E-02
+ Transm vs Energy curve  -4.790000      7.0208281E-02
+ Transm vs Energy curve  -4.780000      6.8894155E-02
+ Transm vs Energy curve  -4.770000      6.7736521E-02
+ Transm vs Energy curve  -4.760000      6.6716462E-02
+ Transm vs Energy curve  -4.750000      6.5818213E-02
+ Transm vs Energy curve  -4.740000      6.5028593E-02
+ Transm vs Energy curve  -4.730000      6.4336546E-02
+ Transm vs Energy curve  -4.720000      6.3732840E-02
+ Transm vs Energy curve  -4.710000      6.3209757E-02
+ Transm vs Energy curve  -4.700000      6.2760867E-02
+ Transm vs Energy curve  -4.690000      6.2380888E-02
+ Transm vs Energy curve  -4.680000      6.2065508E-02
+ Transm vs Energy curve  -4.670000      6.1811313E-02
+ Transm vs Energy curve  -4.660000      6.1615683E-02
+ Transm vs Energy curve  -4.650000      6.1476752E-02
+ Transm vs Energy curve  -4.640000      6.1393354E-02
+ Transm vs Energy curve  -4.630000      6.1365012E-02
+ Transm vs Energy curve  -4.620000      6.1391935E-02
+ Transm vs Energy curve  -4.610000      6.1475039E-02
+ Transm vs Energy curve  -4.600000      6.1615974E-02
+ Transm vs Energy curve  -4.590000      6.1817199E-02
+ Transm vs Energy curve  -4.580000      6.2082041E-02
+ Transm vs Energy curve  -4.570000      6.2414825E-02
+ Transm vs Energy curve  -4.560000      6.2821016E-02
+ Transm vs Energy curve  -4.550000      6.3307397E-02
+ Transm vs Energy curve  -4.540000      6.3882314E-02
+ Transm vs Energy curve  -4.530000      6.4556010E-02
+ Transm vs Energy curve  -4.520000      6.5340988E-02
+ Transm vs Energy curve  -4.510000      6.6252552E-02
+ Transm vs Energy curve  -4.500000      6.7309447E-02
+ Transm vs Energy curve  -4.490000      6.8534762E-02
+ Transm vs Energy curve  -4.480000      6.9957055E-02
+ Transm vs Energy curve  -4.470000      7.1611874E-02
+ Transm vs Energy curve  -4.460000      7.3543794E-02
+ Transm vs Energy curve  -4.450000      7.5809196E-02
+ Transm vs Energy curve  -4.440000      7.8480035E-02
+ Transm vs Energy curve  -4.430000      8.1649162E-02
+ Transm vs Energy curve  -4.420000      8.5437685E-02
+ Transm vs Energy curve  -4.410000      9.0005644E-02
+ Transm vs Energy curve  -4.400000      9.5567405E-02
+ Transm vs Energy curve  -4.390000      0.1024143    
+ Transm vs Energy curve  -4.380000      0.1109487    
+ Transm vs Energy curve  -4.370000      0.1217354    
+ Transm vs Energy curve  -4.360000      0.1355802    
+ Transm vs Energy curve  -4.350000      0.1536518    
+ Transm vs Energy curve  -4.340000      0.1776651    
+ Transm vs Energy curve  -4.330000      0.2101460    
+ Transm vs Energy curve  -4.320000      0.2547529    
+ Transm vs Energy curve  -4.310000      0.3164393    
+ Transm vs Energy curve  -4.300000      0.4005744    
+ Transm vs Energy curve  -4.290000      0.5084625    
+ Transm vs Energy curve  -4.280000      0.6253541    
+ Transm vs Energy curve  -4.270000      0.7075299    
+ Transm vs Energy curve  -4.260000      0.7050704    
+ Transm vs Energy curve  -4.250000      0.6209777    
+ Transm vs Energy curve  -4.240000      0.5064737    
+ Transm vs Energy curve  -4.230000      0.4022263    
+ Transm vs Energy curve  -4.220000      0.3209853    
+ Transm vs Energy curve  -4.210000      0.2611021    
+ Transm vs Energy curve  -4.200000      0.2174610    
+ Transm vs Energy curve  -4.190000      0.1854114    
+ Transm vs Energy curve  -4.180000      0.1615139    
+ Transm vs Energy curve  -4.170000      0.1433810    
+ Transm vs Energy curve  -4.160000      0.1293800    
+ Transm vs Energy curve  -4.150000      0.1183905    
+ Transm vs Energy curve  -4.140000      0.1096338    
+ Transm vs Energy curve  -4.130000      0.1025608    
+ Transm vs Energy curve  -4.120000      9.6777387E-02
+ Transm vs Energy curve  -4.110000      9.1996431E-02
+ Transm vs Energy curve  -4.100000      8.8005282E-02
+ Transm vs Energy curve  -4.090000      8.4644191E-02
+ Transm vs Energy curve  -4.080000      8.1791490E-02
+ Transm vs Energy curve  -4.070000      7.9353340E-02
+ Transm vs Energy curve  -4.060000      7.7256478E-02
+ Transm vs Energy curve  -4.050000      7.5443134E-02
+ Transm vs Energy curve  -4.040000      7.3867254E-02
+ Transm vs Energy curve  -4.030000      7.2491780E-02
+ Transm vs Energy curve  -4.020000      7.1286671E-02
+ Transm vs Energy curve  -4.010000      7.0227325E-02
+ Transm vs Energy curve  -4.000000      6.9293499E-02
+ Transm vs Energy curve  -3.990000      6.8468370E-02
+ Transm vs Energy curve  -3.980000      6.7737900E-02
+ Transm vs Energy curve  -3.970000      6.7090288E-02
+ Transm vs Energy curve  -3.960000      6.6515557E-02
+ Transm vs Energy curve  -3.950000      6.6005245E-02
+ Transm vs Energy curve  -3.940000      6.5552101E-02
+ Transm vs Energy curve  -3.930000      6.5149933E-02
+ Transm vs Energy curve  -3.920000      6.4793386E-02
+ Transm vs Energy curve  -3.910000      6.4477839E-02
+ Transm vs Energy curve  -3.900000      6.4199261E-02
+ Transm vs Energy curve  -3.890000      6.3954152E-02
+ Transm vs Energy curve  -3.880000      6.3739441E-02
+ Transm vs Energy curve  -3.870000      6.3552447E-02
+ Transm vs Energy curve  -3.860000      6.3390791E-02
+ Transm vs Energy curve  -3.850000      6.3252389E-02
+ Transm vs Energy curve  -3.840000      6.3135378E-02
+ Transm vs Energy curve  -3.830000      6.3038118E-02
+ Transm vs Energy curve  -3.820000      6.2959149E-02
+ Transm vs Energy curve  -3.810000      6.2897161E-02
+ Transm vs Energy curve  -3.800000      6.2850997E-02
+ Transm vs Energy curve  -3.790000      6.2819608E-02
+ Transm vs Energy curve  -3.780000      6.2802054E-02
+ Transm vs Energy curve  -3.770000      6.2797494E-02
+ Transm vs Energy curve  -3.760000      6.2805183E-02
+ Transm vs Energy curve  -3.750000      6.2824436E-02
+ Transm vs Energy curve  -3.740000      6.2854633E-02
+ Transm vs Energy curve  -3.730000      6.2895223E-02
+ Transm vs Energy curve  -3.720000      6.2945709E-02
+ Transm vs Energy curve  -3.710000      6.3005634E-02
+ Transm vs Energy curve  -3.700000      6.3074596E-02
+ Transm vs Energy curve  -3.690000      6.3152216E-02
+ Transm vs Energy curve  -3.680000      6.3238174E-02
+ Transm vs Energy curve  -3.670000      6.3332155E-02
+ Transm vs Energy curve  -3.660000      6.3433893E-02
+ Transm vs Energy curve  -3.650000      6.3543148E-02
+ Transm vs Energy curve  -3.640000      6.3659683E-02
+ Transm vs Energy curve  -3.630000      6.3783310E-02
+ Transm vs Energy curve  -3.620000      6.3913852E-02
+ Transm vs Energy curve  -3.610000      6.4051151E-02
+ Transm vs Energy curve  -3.600000      6.4195052E-02
+ Transm vs Energy curve  -3.590000      6.4345442E-02
+ Transm vs Energy curve  -3.580000      6.4502209E-02
+ Transm vs Energy curve  -3.570000      6.4665250E-02
+ Transm vs Energy curve  -3.560000      6.4834490E-02
+ Transm vs Energy curve  -3.550000      6.5009847E-02
+ Transm vs Energy curve  -3.540000      6.5191269E-02
+ Transm vs Energy curve  -3.530000      6.5378703E-02
+ Transm vs Energy curve  -3.520000      6.5572113E-02
+ Transm vs Energy curve  -3.510000      6.5771468E-02
+ Transm vs Energy curve  -3.500000      6.5976746E-02
+ Transm vs Energy curve  -3.490000      6.6187941E-02
+ Transm vs Energy curve  -3.480000      6.6405036E-02
+ Transm vs Energy curve  -3.470000      6.6628054E-02
+ Transm vs Energy curve  -3.460000      6.6856995E-02
+ Transm vs Energy curve  -3.450000      6.7091882E-02
+ Transm vs Energy curve  -3.440000      6.7332745E-02
+ Transm vs Energy curve  -3.430000      6.7579620E-02
+ Transm vs Energy curve  -3.420000      6.7832544E-02
+ Transm vs Energy curve  -3.410000      6.8091564E-02
+ Transm vs Energy curve  -3.400000      6.8356737E-02
+ Transm vs Energy curve  -3.390000      6.8628125E-02
+ Transm vs Energy curve  -3.380000      6.8905793E-02
+ Transm vs Energy curve  -3.370000      6.9189817E-02
+ Transm vs Energy curve  -3.360000      6.9480278E-02
+ Transm vs Energy curve  -3.350000      6.9777258E-02
+ Transm vs Energy curve  -3.340000      7.0080861E-02
+ Transm vs Energy curve  -3.330000      7.0391178E-02
+ Transm vs Energy curve  -3.320000      7.0708320E-02
+ Transm vs Energy curve  -3.310000      7.1032390E-02
+ CPU Time:   8.03894600000000     
+Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes
+Using RUQT-Fortran to calculate transport
+Running Calculation using the following paramaters:
+{'output': 'wbl_example', 'exmol_dir': '../exmol_example/ben/', 'num_elec_atoms': 2, 'exmol_prog': 'molcas', 'run_molcas': False, 'min_trans_energy': -2.0, 'max_trans_energy': 2.0, 'delta_energy': 0.01, 'min_bias': -2, 'max_bias': 2, 'delta_bias': 0.1, 'temp': 1e-05, 'dft_functional': 'pbe', 'basis_set': 'lanl2dz', 'ecp': 'lanl2dz', 'exmol_geo': None, 'state_num': 1, 'FermiE': -5.3, 'FermiD': 0.07, 'qc_method': 'dft', 'rdm_type': 1, 'fort_data': None, 'fort_trans': False, 'fd_change': 0.001}
+Using Molcas calculation at ../exmol_example/ben/ for extended molecular region
+Using the effective Hamiltonian for electronic state 1 of extended mol. region
+Reading data for state 1 out of 1 elec. states.
+Calculating 401 transmission energies from: 2.0000000000000036 eV to -2.0 eV
+Final transmission values will be printed to wbl_example.trans in relative transmission vs eV
+Reading data for state 1 out of 1 elec. states.

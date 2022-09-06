@@ -38,11 +38,11 @@ Python3, Numpy, Scipy, and Matplotlib
 MKL (RUQT-Fortran)
 
 
-NEGF Transport Calculator Options. Only 1 of the following are required but both recommended.
+NEGF Transport Calculator Options. Only 1 of the following are required but both are recommended to enable both NEGF calculators.
 
-    (Default): Atomic Simulation Environment from https://wiki.fysik.dtu.dk/ase/
+    For sie_negf class: Atomic Simulation Environment from https://wiki.fysik.dtu.dk/ase/
 
-    (Optional): Compiled RUQT executable. Compile the RUQT.x executable in the RUQT subdirectory.
+    For wbl_negf class: Compiled RUQT executable. Compile the RUQT.x executable in the RUQT subdirectory.
 
 Electronic Structure Calculator Options. Only 1 of the following are required but both recommended:
 

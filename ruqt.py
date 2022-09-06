@@ -112,6 +112,7 @@ def orb_read_molcas(data_dir,exmol_molcasd,datafile,num_elec,outputfile):
  return norb,numocc,numvirt,size_ex,size_elec
 
 def read_syminfo(data_dir,norb,num_elec,outputfile):
+ import os
  for file in os.listdir(data_dir):
   if file.endswith(".SymInfo"):
    orb_file=os.path.join(data_dir, file)
@@ -130,7 +131,7 @@ def read_syminfo(data_dir,norb,num_elec,outputfile):
  size_elec=num_elec*(int(line_data[0]))
  size_ex=norb-2*size_elec
 
- filesearch.close
+ filesearch2.close
  return size_ex,size_elec
 
 
@@ -370,10 +371,10 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
  
  KT=temp*8.617333262E-5
 
- if rdm_type=="1":
+ if rdm_type==1:
   use_b0="F"
   b0_type="rdm"
- elif rdm_type=="2":
+ elif rdm_type==2:
   use_b0=="T"
   b0_type="cisd"
  else:
@@ -384,9 +385,10 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
 
   #cpdata_1=subprocess.Popen(cp_fock,shell=True)
   #cpdata_1.wait()
-  h,s,norb,numelec,actorb,actelec,states=esc_molcas2(data_dir,data_file,state_num,outputfile) 
+  h,s,norb,numelec,actorb,actelec,states=esc_molcas2(exmol_dir,"MolEl.dat",state_num,outputfile) 
   size_ex,size_elec=read_syminfo(exmol_dir,norb,num_elec_atoms,outputfile)  
-
+  numocc=int(numelec/2)
+  numvirt=norb-numocc
  elif exmol_prog=="maple" or exmol_prog=="pyscf":
   norb,numocc,numvirt,size_ex,size_elec=orb_read_scfdat(exmol_dir,exmol_file,num_elec,outputfile)
 
