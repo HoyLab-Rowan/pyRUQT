@@ -151,9 +151,9 @@ class sie_negf:
   inp=self.input_parameters
   print("Performing a Landauer current calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
-  print("Final transmission values will be printed to "+output+".trans"+" in relative transmission vs eV",file=outputfile)
-  print("Final current values will be printed to "+output+".iv"+" in volts vs ampheres",file=outputfile)
-  print("Final conductance values will be printed to "+output+".con"+" in volts vs G_0",file=outputfile)
+  print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
+  print("Final current values will be printed to "+inp['output']+".iv"+" in volts vs ampheres",file=outputfile)
+  print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
   T=sie_negf.transmission(self)
   I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
@@ -277,9 +277,9 @@ class wbl_negf:
   inp=self.input_parameters
   print("Performing a Landauer current calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
-  print("Final transmission values will be printed to "+output+".trans"+" in relative transmission vs eV",file=outputfile)
-  print("Final current values will be printed to "+output+".iv"+" in volts vs ampheres",file=outputfile)
-  print("Final conductance values will be printed to "+output+".con"+" in volts vs G_0",file=outputfile)
+  print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
+  print("Final current values will be printed to "+inp['output']+".iv"+" in volts vs ampheres",file=outputfile)
+  print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
   if inp['fort_trans']==False:
    ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec)
