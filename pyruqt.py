@@ -53,6 +53,7 @@ class sie_negf:
                           'min_bias'     : -2,
                           'max_bias'     : 2,
                           'delta_bias'   : 0.1,
+                          'temp'         : 1E-5,
                           'full_align'   : True,
                           'dft_functional' : "pbe",
                           'basis_set'  : "lanl2dz",
@@ -144,7 +145,7 @@ class sie_negf:
   plt.ylabel('Transmission (rel)')
   plt.savefig(inp['output']+"_trans.png")
   plt.clf()
-  return T 
+  return T,calc
 
  def current(self):
   energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
@@ -155,26 +156,26 @@ class sie_negf:
   print("Final current values will be printed to "+inp['output']+".iv"+" in volts vs ampheres",file=outputfile)
   print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
-  T=sie_negf.transmission(self)
+  T,calc=sie_negf.transmission(self)
   I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
   i_plot=plt.plot(bias,2.*units._e**2/units._hplanck*I)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Current (A)')
-  plt.savefig(output+"_current.png")
+  plt.savefig(inp['output']+"_current.png")
 
   b_range=len(bias)
   cond=np.zeros(b_range)
   for x in range(len(bias)):
    cond[x]=I[x]/bias[x]
   I=2.*units._e**2/units._hplanck*I
-  np.savetxt(self.output+".iv",np.c_[bias,I],fmt="%s")
+  np.savetxt(inp['output']+".iv",np.c_[bias,I],fmt="%s")
 
   plt.clf()
   c_plot=plt.plot(bias,cond)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Conductance (G_0)')
-  plt.savefig(self.output+"_conductance.png")
-  np.savetxt(self.output+".con",np.c_[bias,cond],fmt="%s")
+  plt.savefig(inp['output']+"_conductance.png")
+  np.savetxt(inp['output']+".con",np.c_[bias,cond],fmt="%s")
 
  def diff_conductance(self):
   energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
@@ -186,7 +187,7 @@ class sie_negf:
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
   print("Final diff. conductance values will be printed to "+inp['output']+".dcon"+" in volts vs G_0",file=outputfile)
  
-  T=sie_negf.transmission(self)
+  T,calc=sie_negf.transmission(self)
 
   DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'])
 
@@ -293,7 +294,7 @@ class wbl_negf:
    h=np.zeros((2,2))
    h1=np.zeros((2,2))
    calc = transport.TransportCalculator(h=h, h1=h1, energies=energies,logfile="temp")
-   I = calc.get_current(bias,T=temp,E=energies,T_e=T,spinpol=spin_pol)
+   I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
    I=2.*units._e**2/units._hplanck*I
  
   t_plot=plt.plot(energies, T)
@@ -305,7 +306,7 @@ class wbl_negf:
   i_plot=plt.plot(bias,I)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Current (A)')
-  plt.savefig(output+"_current.png")
+  plt.savefig(inp['output']+"_current.png")
   b_range=len(bias)
   cond=np.zeros(b_range)
   for x in range(len(bias)):
