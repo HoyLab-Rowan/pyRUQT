@@ -2,7 +2,7 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 
-***Update (8/31/2022): First public version of pyRUQT (v0.1) is now available. More updates and improvements to follow later this year.***
+***Update (5/3/2023): General bug fixs/improvements. New Current Calculator***
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
