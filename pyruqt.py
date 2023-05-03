@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import ruqt
 from numpy import linalg
+import sys
 
 class sie_negf:
  def __init__(self, **kwargs):
@@ -40,6 +41,7 @@ class sie_negf:
   align_elec : {0,int},optional
   dos_calc : {False,bool},optional
   fd_change : {0.001,float},optional
+  ase_current: False,bool}, optional
   """
   self.input_parameters = {'output'    : "pyruqt_results",
                           'exmol_prog' : "molcas",
@@ -68,7 +70,8 @@ class sie_negf:
                           'spin_pol'      : False,
                           'align_elec'    : 0,
                           'dos_calc'      : False,
-                          'fd_change'     : 0.001} 
+                          'fd_change'     : 0.001,
+                          'ase_current'   : False} 
 
   self.param_update(**kwargs)
   
@@ -83,14 +86,15 @@ class sie_negf:
  def calc_setup(self):
   inp=self.input_parameters
   outputfile=open(inp['output']+".out",'w')
-  
+  sys.stderr=open(inp['output']+".err",'w')
+ 
   print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
   print("Using Atomic Simulation Environment to calculate electrode interactions and transport",file=outputfile)
   print("Running Calculation using the following paramaters:",file=outputfile)
   print(self.input_parameters,file=outputfile)
   energies=np.arange(inp['min_trans_energy'],inp['max_trans_energy']+inp['delta_energy'],inp['delta_energy'])
   bias=np.arange(inp['min_bias'],inp['max_bias']+inp['delta_bias'],inp['delta_bias'])
-  bias=np.where(abs(bias)<0.01, 0.01, bias)
+  bias=np.where(abs(bias)<0.01, 0.0001, bias)
 
   if inp['exmol_prog']=="molcas":
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
@@ -112,7 +116,7 @@ class sie_negf:
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
   elif self.elec_prog=="pyscf":
-   h1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   hs1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
   if inp['coupling_calc']=="Fock_EX":
    hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,s1,inp['coupled'],inp['n_elec_units'])
   else:
@@ -157,7 +161,10 @@ class sie_negf:
   print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
   T,calc=sie_negf.transmission(self)
-  I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
+  if inp['ase_current']==True:
+   I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
+  else:
+   I = ruqt.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'],delta_e=inp['delta_energy'])
   i_plot=plt.plot(bias,2.*units._e**2/units._hplanck*I)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Current (A)')
@@ -224,7 +231,8 @@ class wbl_negf:
                           'rdm_type'   : 1,
                           'fort_data'  : None,
                           'fort_trans' : False,
-                          'fd_change'  : 0.001}
+                          'fd_change'  : 0.001,
+                          'ase_current' : False}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -238,6 +246,8 @@ class wbl_negf:
  def calc_setup(self):
   inp=self.input_parameters
   outputfile=open(inp['output']+".out",'w')
+  sys.stderr=open(inp['output']+".err",'w')
+
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
   print("Using RUQT-Fortran to calculate transport",file=outputfile)
   print("Running Calculation using the following paramaters:",file=outputfile)
@@ -294,7 +304,10 @@ class wbl_negf:
    h=np.zeros((2,2))
    h1=np.zeros((2,2))
    calc = transport.TransportCalculator(h=h, h1=h1, energies=energies,logfile="temp")
-   I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
+   if inp['ase_current']==True:
+    I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
+   else:
+    I = ruqt.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'],delta_e=inp['delta_energy'])
    I=2.*units._e**2/units._hplanck*I
  
   t_plot=plt.plot(energies, T)
@@ -344,7 +357,7 @@ class wbl_negf:
   h1=np.zeros((2,2))
   calc = transport.TransportCalculator(h=h, h1=h1, energies=energies,logfile="temp")
 
-  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'])
+  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'],inp['ase_current'])
   c_plot=plt.plot(bias,DE)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Diff. Conductance (G_0)')

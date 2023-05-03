@@ -10,11 +10,15 @@ import string,subprocess
 #These functions are new RUQT routines for getting properties not calculated by ASE
 
 #Calculates differental conductance
-def get_diffcond(calc,bias,temp,energies,T,fd_change):
+def get_diffcond(calc,bias,temp,energies,T,fd_change,ase_current,delta_e):
  p_bias=bias+fd_change
  n_bias=bias-fd_change
- I_p=calc.get_current(p_bias,T=temp,E=energies,T_e=T)
- I_n=calc.get_current(n_bias,T=temp,E=energies,T_e=T)
+ if ase_current==True:
+  I_p=calc.get_current(p_bias,T=temp,E=energies,T_e=T)
+  I_n=calc.get_current(n_bias,T=temp,E=energies,T_e=T)
+ else:
+  I_p=ruqt.get_current(p_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
+  I_n=ruqt.get_current(n_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
  b_range=len(bias)
  DE=np.zeros(b_range)
  for x in range(b_range):
@@ -459,6 +463,50 @@ def fort_calc(ruqt_exe,calcname,energies,bias,calc_type,outputfile):
 
  negffile.close()
  return T,I
+
+#These routines are improved and/or fixed versions of ASE functions for SIE calculations.
+def get_current(bias, T=None, E=None, T_e=None, spinpol=False, delta_e=None):
+
+ kB=8.617333262E-5
+
+ if not isinstance(bias, (int, float)):
+   bias = bias[np.newaxis]
+   E = E[:, np.newaxis]
+ #  T_e = T_e[:, np.newaxis]
+
+ fl = f_fermidistribution(E - bias / 2., kB * T)
+ fr = f_fermidistribution(E + bias / 2., kB * T)
+
+ iv=np.zeros(bias.size,dtype=float)
+ fl_dat=np.asarray(fl)
+ fr_dat=np.asarray(fr)
+ f_dat=fl_dat-fr_dat 
+
+ if spinpol:
+  spin=0.5
+ else:
+  spin=1.0
+
+ for b in range(bias.size):
+  for k in range(E.size):
+   iv[b]+=spin * f_dat[k,b] * T_e[k]*delta_e
+
+ return iv
+
+def f_fermidistribution(energy, kt):
+    # fermi level is fixed to zero
+    # energy can be a single number or a list
+ assert kt >= 0., 'Negative temperature encountered!'
+
+ if kt == 0:
+  if isinstance(energy, float):
+   return int(energy / 2. <= 0)
+  else:
+   return (energy / 2. <= 0).astype(int)
+ else:
+   #return 1. / (1. + np.exp(energy/kt))
+   return 1. / (1. + np.exp(energy)**(1/kt))
+
 
 #Routine to make .scf_dat file used by older RUQT-Fortran versions
 def make_scfdat(mo_coeff,mo_energies,overlap,fock_mat,calcname):

@@ -1,0 +1,22 @@
+Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes
+Using Atomic Simulation Environment to calculate electrode interactions and transport
+Running Calculation using the following paramaters:
+{'output': 'sie_1', 'exmol_prog': 'molcas', 'exmol_dir': '../exmol_example/ben/', 'elec_prog': 'molcas', 'elec_dir': '../elec_example/au_elec/', 'run_molcas': False, 'min_trans_energy': -2.0, 'max_trans_energy': 2.0, 'delta_energy': 0.001, 'min_bias': -2, 'max_bias': 2, 'delta_bias': 0.1, 'temp': 300, 'full_align': True, 'dft_functional': 'pbe', 'basis_set': 'lanl2dz', 'ecp': 'lanl2dz', 'n_elec_units': 2, 'exmol_geo': None, 'elec_geo': None, 'state_num': 1, 'state_num_e': 1, 'coupling_calc': 'none', 'coupled': 'molecule', 'spin_pol': False, 'align_elec': 0, 'dos_calc': False, 'fd_change': 0.001, 'ase_current': False}
+Using Molcas calculation at ../exmol_example/ben/ for extended molecular region
+Using the effective Hamiltonian for electronic state 1 of extended mol. region
+Using Molcas calculation at ../elec_example/au_elec/ for left electrode
+Using the effective Hamiltonian for electronic state 1 of extended mol. region
+Assuming symmetric electrodes
+Reading data for state 1 out of 1 elec. states.
+Reading data for state 1 out of 1 elec. states.
+Calculating 4001 transmission energies from: 1.9999999999995595 eV to -2.0 eV
+Final transmission values will be printed to sie_1.trans in relative transmission vs eV
+Performing NEGF Transport Calculations using the Atomic Simulation Environment
+01 -2.0e-01 -1.0e-01  1.0e-04  1.0e-01  2.0e-01  3.0e-01
+  4.0e-01  5.0e-01  6.0e-01  7.0e-01  8.0e-01  9.0e-01  1.0e+00  1.1e+00
+  1.2e+00  1.3e+00  1.4e+00  1.5e+00  1.6e+00  1.7e+00  1.8e+00  1.9e+00
+  2.0e+00]
+Calculating 4001 transmission energies from: 1.9999999999995595 eV to -2.0 eV
+Final transmission values will be printed to sie_1.trans in relative transmission vs eV
+Final current values will be printed to sie_1.iv in volts vs ampheres
+Final conductance values will be printed to sie_1.con in volts vs G_0
