@@ -2,7 +2,7 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 
-***Update (5/3/2023): General bug fixs/improvements. New Current Calculator***
+***Update (5/8/2023): General bug fixs/improvements. New Current Calculator and support for non-identical electrodes***
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
