@@ -214,7 +214,7 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp):
  return h,s 
 
 #These routines calculate the electrode-molecule coupling when coupling_calc is set to Fock_EX
-def calc_coupling(h,s,h1,s1,coupled,elec_units):
+def calc_coupling(h,s,h1,h2,s1,h2,coupled,elec_units):
  import numpy as np
  #l_h_dim=np.ndarray.shape(h)
  #l_h1_dim=np.ndarray.size(h1)
@@ -224,26 +224,47 @@ def calc_coupling(h,s,h1,s1,coupled,elec_units):
  l_mol=l_h-2*l_h1
  hc1=np.zeros((l_h1,l_h),dtype=np.complex)
  sc1=np.zeros((l_h1,l_h),dtype=np.complex)
- hc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
- sc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
+ if h2==None:
+  hc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
+  sc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
+ else:
+  l_h2_0=len(h2)
+  l_h2=l_h2_0//elec_units
+  hc2=np.zeros(shape=(l_h2,l_h),dtype=np.complex)
+  sc2=np.zeros(shape=(l_h2,l_h),dtype=np.complex)
+
  if coupled=="molecule":
   hc1[:l_h1,:l_h1]=h1[:l_h1,l_h1:2*l_h1]
   sc1[:l_h1,:l_h1]=s1[:l_h1,l_h1:2*l_h1]
   hc1[:l_h1,l_h1:(l_h-l_h1)]=h[:l_h1,l_h1:(l_h-l_h1)]
   sc1[:l_h1,l_h1:(l_h-l_h1)]=s[:l_h1,l_h1:(l_h-l_h1)]
-  hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
-  sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
-  hc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(h[l_h1:(l_h-l_h1),:l_h1])
-  sc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(s[l_h1:(l_h-l_h1),:l_h1])
+  if h2==None:
+   hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
+   sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
+   hc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(h[l_h1:(l_h-l_h1),:l_h1])
+   sc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(s[l_h1:(l_h-l_h1),:l_h1])
+  else:
+   hc2[-l_h2:,-l_h2:]=h2[l_h2:2*l_h2,:l_h2]
+   sc2[-l_h2:,-l_h2:]=s2[l_h2:2*l_h2,:l_h2]
+   hc2[-l_h2:,-(l_mol+l_h2):-l_h2]=np.transpose(h[l_h2:(l_h-l_h2),:l_h2])
+   sc2[-l_h2:,-(l_mol+l_h2):-l_h2]=np.transpose(s[l_h2:(l_h-l_h2),:l_h2])
+
  elif coupled=="extended_molecule":
   hc1[:l_h1,:l_h1]=h1[:l_h1,l_h1:2*l_h1]
   sc1[:l_h1,:l_h1]=s1[:l_h1,l_h1:2*l_h1]
   hc1[:l_h1,l_h1:l_h]=h[:l_h1,l_h1:l_h]
   sc1[:l_h1,l_h1:l_h]=s[:l_h1,l_h1:l_h]
-  hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
-  sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
-  hc2[-l_h1:,-l_h:-l_h1]=np.transpose(h[l_h1:l_h,:l_h1])
-  sc2[-l_h1:,-l_h:-l_h1]=np.transpose(s[l_h1:l_h,:l_h1])
+  if h2==None:
+   hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
+   sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
+   hc2[-l_h1:,-l_h:-l_h1]=np.transpose(h[l_h1:l_h,:l_h1])
+   sc2[-l_h1:,-l_h:-l_h1]=np.transpose(s[l_h1:l_h,:l_h1])
+  else:
+   hc2[-l_h2:,-l_h2:]=h2[l_h2:2*l_h2,:l_h2]
+   sc2[-l_h2:,-l_h2:]=s1[l_h2:2*l_h2,:l_h2]
+   hc2[-l_h2:,-l_h:-l_h2]=np.transpose(h[l_h2:l_h,:l_h2])
+   sc2[-l_h2:,-l_h:-l_h2]=np.transpose(s[l_h2:l_h,:l_h2])
+
  return hc1,sc1,hc2,sc2
 
 #The routines below are for creating inputs/calling/getting data from RUQT-Fortran transport calculations from pyRUQT

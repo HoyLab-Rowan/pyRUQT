@@ -48,6 +48,7 @@ class sie_negf:
                           'exmol_dir'  : None,
                           'elec_prog'  : "molcas",
                           'elec_dir'   : None,
+                          'elec2_dir'  : None,
                           'run_molcas'  : False,
                           'min_trans_energy' : -2.0,
                           'max_trans_energy' : 2.0,
@@ -63,6 +64,7 @@ class sie_negf:
                           'n_elec_units'   : 2,
                           'exmol_geo'  : None,
                           'elec_geo'   : None,
+                          'elec2_geo'  : None,
                           'state_num'  : 1, 
                           'state_num_e' : 1,
                           'coupling_calc' : "none",
@@ -104,8 +106,11 @@ class sie_negf:
 
   if inp['elec_prog']=="molcas":
    print("Using Molcas calculation at "+inp['elec_dir']+" for left electrode",file=outputfile)
+   if inp['elec2_dir']!=None:
+    print("Using non-identical electrodes. Right electrode geometry taken from: "+inp['elec2_dir'],file=outputfile)
+   else
+    print("Assuming symmetric electrodes",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
-   print("Assuming symmetric electrodes",file=outputfile)
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -115,20 +120,31 @@ class sie_negf:
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   if inp['elec2_dir']!=None:
+    h2,s2,norb_re,numelec_re,actorb_re,actelec_re,states_re=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   else
+    h2=None
+    s2=None
   elif self.elec_prog=="pyscf":
-   hs1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   h1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   if inp['elec2_geo']!=None:
+    h2,s2=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   else
+    h2=None
+    s2=None
+
   if inp['coupling_calc']=="Fock_EX":
-   hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,s1,inp['coupled'],inp['n_elec_units'])
+   hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,s1,h2,s2,inp['coupled'],inp['n_elec_units'])
   else:
    hc1=None
    sc1=None
    hc2=None
    sc2=None
 
-  return(energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2)
+  return(energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2)
 
  def transmission(self):
-  energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
+  energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
   inp=self.input_parameters
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
@@ -140,9 +156,9 @@ class sie_negf:
   if inp['align_elec']>=1:
    inp['align_elec']-=1
    print("Aligning the "+str(inp['align_elec'])+" element of both electrode and extended molecule",file=outputfile)
-   calc = transport.TransportCalculator(h=h, h1=h1, s=s, s1=s1,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'])
+   calc = transport.TransportCalculator(h=h, h1=h1,h2=h2 s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'])
   elif inp['align_elec']<1:
-   calc=transport.TransportCalculator(h=h, h1=h1, s=s, s1=s1,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans")
+   calc=transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans")
   T = calc.get_transmission()
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
@@ -152,7 +168,7 @@ class sie_negf:
   return T,calc
 
  def current(self):
-  energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
+  energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
   inp=self.input_parameters
   print("Performing a Landauer current calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
@@ -185,7 +201,7 @@ class sie_negf:
   np.savetxt(inp['output']+".con",np.c_[bias,cond],fmt="%s")
 
  def diff_conductance(self):
-  energies,bias,outputfile,h,h1,s,s1,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
+  energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
   inp=self.input_parameters
   print("Calculating differential conductance using numerical derivatives",file=outputfile)
   print("Calculting each value using the +/-"+str(inp['fd_change'])+" voltage points around it.",file=outputfile)
