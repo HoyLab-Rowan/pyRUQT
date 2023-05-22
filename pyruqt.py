@@ -108,7 +108,7 @@ class sie_negf:
    print("Using Molcas calculation at "+inp['elec_dir']+" for left electrode",file=outputfile)
    if inp['elec2_dir']!=None:
     print("Using non-identical electrodes. Right electrode geometry taken from: "+inp['elec2_dir'],file=outputfile)
-   else
+   else:
     print("Assuming symmetric electrodes",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
 
@@ -122,14 +122,14 @@ class sie_negf:
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
    if inp['elec2_dir']!=None:
     h2,s2,norb_re,numelec_re,actorb_re,actelec_re,states_re=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
-   else
+   else:
     h2=None
     s2=None
   elif self.elec_prog=="pyscf":
    h1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
    if inp['elec2_geo']!=None:
     h2,s2=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
-   else
+   else:
     h2=None
     s2=None
 
