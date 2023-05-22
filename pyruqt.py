@@ -134,7 +134,7 @@ class sie_negf:
     s2=None
 
   if inp['coupling_calc']=="Fock_EX":
-   hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,s1,h2,s2,inp['coupled'],inp['n_elec_units'])
+   hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,h2,s1,s2,inp['coupled'],inp['n_elec_units'])
   else:
    hc1=None
    sc1=None
@@ -156,7 +156,7 @@ class sie_negf:
   if inp['align_elec']>=1:
    inp['align_elec']-=1
    print("Aligning the "+str(inp['align_elec'])+" element of both electrode and extended molecule",file=outputfile)
-   calc = transport.TransportCalculator(h=h, h1=h1,h2=h2 s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'])
+   calc = transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'])
   elif inp['align_elec']<1:
    calc=transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans")
   T = calc.get_transmission()

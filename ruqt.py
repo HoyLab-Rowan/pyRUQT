@@ -214,7 +214,7 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp):
  return h,s 
 
 #These routines calculate the electrode-molecule coupling when coupling_calc is set to Fock_EX
-def calc_coupling(h,s,h1,h2,s1,h2,coupled,elec_units):
+def calc_coupling(h,s,h1,h2,s1,s2,coupled,elec_units):
  import numpy as np
  #l_h_dim=np.ndarray.shape(h)
  #l_h1_dim=np.ndarray.size(h1)
