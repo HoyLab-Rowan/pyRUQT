@@ -406,11 +406,11 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
   print("RDM calculation selection not supported. Please check README for options.")
 
  if exmol_prog=="molcas":
-  #cp_fock='cp '+exmol_dir+"/MolEl.dat"+' MolEl.dat'
+  cp_fock='cp '+exmol_dir+"/MolEl.dat"+' MolEl.dat'
 
-  #cpdata_1=subprocess.Popen(cp_fock,shell=True)
-  #cpdata_1.wait()
-  h,s,norb,numelec,actorb,actelec,states=esc_molcas2(exmol_dir,"MolEl.dat",state_num,outputfile) 
+  cpdata_1=subprocess.Popen(cp_fock,shell=True)
+  cpdata_1.wait()
+  #h,s,norb,numelec,actorb,actelec,states=esc_molcas2(exmol_dir,"MolEl.dat",state_num,outputfile) 
   size_ex,size_elec=read_syminfo(exmol_dir,norb,num_elec_atoms,outputfile)  
   numocc=int(numelec/2)
   numvirt=norb-numocc

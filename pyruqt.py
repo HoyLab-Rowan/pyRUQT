@@ -73,8 +73,8 @@ class sie_negf:
                           'align_elec'    : 0,
                           'dos_calc'      : False,
                           'fd_change'     : 0.001,
-                          'ase_current'   : False} 
-
+                          'ase_current'   : False,
+                          'elec_size'     : [0,0]}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -125,13 +125,20 @@ class sie_negf:
    else:
     h2=None
     s2=None
-  elif self.elec_prog=="pyscf":
+  elif inp['elec_prog']=="pyscf":
    h1,s1=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
    if inp['elec2_geo']!=None:
     h2,s2=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
    else:
     h2=None
     s2=None
+  elif inp['elec_prog']=="supercell":
+   l_elec=inp['elec_size'][0]
+   r_elec=inp['elec_size'][1]
+   h1=h[:l_elec,:l_elec]
+   h2=h[-r_elec:,-r_elec:]
+   s1=s[:l_elec,:l_elec]
+   s2=s[-r_elec:,-r_elec:]
 
   if inp['coupling_calc']=="Fock_EX":
    hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,h2,s1,s2,inp['coupled'],inp['n_elec_units'])
@@ -310,7 +317,7 @@ class wbl_negf:
 
   if inp['fort_trans']==False:
    ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec)
-   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,calc_type,outputfile)
+   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"C",outputfile)
 
   elif inp['fort_trans']==True:
    print("Calculating current with ASE transport",file=outputfile)
