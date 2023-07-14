@@ -211,7 +211,10 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp):
  h = rks_elec.get_fock()
  h=h*27.2114
  s = rks_elec.get_ovlp()
- return h,s 
+ norb=len(h)
+ numelec=int(np.sum(rks_elec.mo_occ))
+ return h,s,norb,numelec
+
 
 #These routines calculate the electrode-molecule coupling when coupling_calc is set to Fock_EX
 def calc_coupling(h,s,h1,h2,s1,s2,coupled,elec_units):
