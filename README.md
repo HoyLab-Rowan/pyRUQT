@@ -3,6 +3,7 @@ Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Funct
 
 
 ***Update (8/25/2023): Support added for supercell calculations which removes the need for a separate electrode calculation when using sie_negf class. Activate using elec_prog="supercell" and include the number of orbitals in each electrode in the supercell via theelec_size=[X,X] keyword.***
+
 Update (5/8/2023): General bug fixs/improvements. New Current Calculator and support for non-identical electrodes
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
