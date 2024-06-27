@@ -197,14 +197,15 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf(geofile,dft_functional,basis_set,ecp):
+def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter):
  #from pyscf import gto,dft,scf 
- geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp)
- rks_elec=dft.RKS(geo).set(max_cycle=100)
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
+ rks_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
  rks_elec.xc=dft_functional
  rks_elec.kernel() 
  if rks_elec.converged==False:
-  scf.addons.dynamic_level_shift_(rks_elec,factor=0.5)
+  rks_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+  #scf.addons.dynamic_level_shift_(rks_elec,factor=0.5)
   rks_elec.damp=0.5
   rks_elec.diis_start_cycle=2
   rks_elec.kernel()  
@@ -214,6 +215,28 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp):
  norb=len(h)
  numelec=int(np.sum(rks_elec.mo_occ))
  return h,s,norb,numelec
+
+def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_atoms):
+ #from pyscf import gto,dft,scf
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
+ rks_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+ rks_elec.xc=dft_functional
+ rks_elec.kernel()
+ if rks_elec.converged==False:
+  rks_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+  #scf.addons.dynamic_level_shift_(rks_elec,factor=0.5)
+  rks_elec.damp=0.5
+  rks_elec.diis_start_cycle=2
+  rks_elec.kernel()
+ h = rks_elec.get_fock()
+ h=h*27.2114
+ s = rks_elec.get_ovlp()
+ norb=len(h)
+ numelec=int(np.sum(rks_elec.mo_occ))
+ test_ao=pyscf.gto.mole.ao_labels(geo,fmt=False)
+ print test_ao
+ elec_orb=10
+ return h,s,norb,numelec,elec_orb
 
 
 #These routines calculate the electrode-molecule coupling when coupling_calc is set to Fock_EX
@@ -417,7 +440,7 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
   size_ex,size_elec=read_syminfo(exmol_dir,norb,num_elec_atoms,outputfile)  
   numocc=int(numelec/2)
   numvirt=norb-numocc
- elif exmol_prog=="maple" or exmol_prog=="pyscf":
+ elif exmol_prog=="maple":
   norb,numocc,numvirt,size_ex,size_elec=orb_read_scfdat(exmol_dir,exmol_file,num_elec,outputfile)
 
 #This part writes the options to the input file for the RUQT Fortran code

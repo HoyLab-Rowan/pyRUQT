@@ -74,7 +74,9 @@ class sie_negf:
                           'dos_calc'      : False,
                           'fd_change'     : 0.001,
                           'ase_current'   : False,
-                          'elec_size'     : [0,0]}
+                          'elec_size'     : [0,0],
+                          'conv_tol'      : 1E-7,
+                          'max_iter'      : 100}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -116,7 +118,7 @@ class sie_negf:
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -126,9 +128,9 @@ class sie_negf:
     h2=None
     s2=None
   elif inp['elec_prog']=="pyscf":
-   h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    if inp['elec2_geo']!=None:
-    h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+    h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    else:
     h2=None
     s2=None
@@ -255,7 +257,9 @@ class wbl_negf:
                           'fort_data'  : None,
                           'fort_trans' : False,
                           'fd_change'  : 0.001,
-                          'ase_current' : False}
+                          'ase_current' : False,
+                          'conv_tol'      : 1E-7,
+                          'max_iter'      : 100}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -289,7 +293,7 @@ class wbl_negf:
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'])
+   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'])
 
   return(energies,bias,outputfile,h,s,norb,numelec)
 
