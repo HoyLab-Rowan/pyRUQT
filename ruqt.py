@@ -197,6 +197,35 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity):
+ from pyscf.pbc import gto as pbcgto
+ from pyscf.pbc import scf as pbcscf
+ from pyscf.pbc import dft as pbcdft
+ from pyscf.pbc import df as pdf
+
+ cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)],verbose=verbosity,dimension=1)
+
+ #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
+ pbc_elec=pbcdft.RKS(cell).set(max_cycle=maxiter,conv_tol=convtol)
+ #print(pbc_elec.kpts)
+ pbc_elec.with_df=pdf.DF(cell)
+ if ecp == None:
+  pbc_elec.with_df.auxbasis='weigend'
+ else:
+   pbc_elec.with_df.auxbasis=ecp
+ #pbc_elec.with_df._cderi_to_save='test_save'
+ pbc_elec.xc=dft_functional
+ #pbc_elec.incore_anyway=True
+ pbc_elec.kernel()
+
+ h_scf=pbc_elec.get_fock()
+ h_scf=h_scf*27.2114
+ s=pbc_elec.get_ovlp()
+ norb=len(h_scf)
+ numelec=int(np.sum(pbc_elec.mo_occ))
+
+ return h_scf,s,norb,numelec
+
 def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter):
  #from pyscf import gto,dft,scf 
  geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
@@ -220,6 +249,7 @@ def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_
  #from pyscf import gto,dft,scf
  geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
  rks_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+ rks_elec.small_rho_cutoff=1e-48
  rks_elec.xc=dft_functional
  rks_elec.kernel()
  if rks_elec.converged==False:
@@ -229,13 +259,56 @@ def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_
   rks_elec.diis_start_cycle=2
   rks_elec.kernel()
  h = rks_elec.get_fock()
- h=h*27.2114
  s = rks_elec.get_ovlp()
+
+ #This part determines the total number of orbitals, number of electrons, and orbitals in the electrodes (assumes symmetric electrodes)
  norb=len(h)
  numelec=int(np.sum(rks_elec.mo_occ))
- test_ao=pyscf.gto.mole.ao_labels(geo,fmt=False)
- print test_ao
- elec_orb=10
+ ao_data=gto.mole.ao_labels(geo,fmt=False)
+ 
+ atom_num=0
+ ao_index=0
+ elec_orb=0
+ ao_data_len=len(ao_data)
+ while atom_num < num_elec_atoms:
+  atom_num=ao_data[ao_index][0]
+  ao_index+=1
+  if ao_index == ao_data_len:
+   print("The # of electrode atoms is incorrect")
+   break
+ elec_orb=ao_index-1
+ print("printing h")
+ print(h)
+ print("printing s")
+ print(s)
+ #This section writes the H and S matrices to a standard ".scf_dat" file for RUQT-Fortran to use
+ scffile=open("fort_ruqt"+".scf_dat",'w')
+ mo_dim=rks_elec.mo_coeff.shape
+ f_dim=h.shape
+ o_dim=s.shape
+
+ scffile.write('Molecular Orbital Coefficients'+"\n")
+ for x in range(0,mo_dim[0]):
+  for y in range(0,mo_dim[1]):
+   scffile.write("{0}".format(x+1)+" "+"{0}".format(y+1)+" "+"{0}".format(rks_elec.mo_coeff[x,y])+"\n")
+
+ scffile.write('Molecular Orbital Energies'+"\n")
+ for x in range(0,mo_dim[0]):
+  scffile.write("{0}".format(rks_elec.mo_energy[x])+"\n")
+
+ scffile.write('Overlap Matrix'+"\n")
+ for x in range(0,o_dim[0]):
+  for y in range(0,o_dim[1]):
+   scffile.write("{0}".format(x+1)+" "+"{0}".format(y+1)+" "+"{0}".format(s[x,y])+"\n")
+
+ scffile.write('Fock Matrix'+"\n")
+ for x in range(0,f_dim[0]):
+  for y in range(0,f_dim[1]):
+   scffile.write("{0}".format(x+1)+" "+"{0}".format(y+1)+" "+"{0}".format(h[x,y])+"\n")
+
+ scffile.close()
+ h=h*27.2114
+ 
  return h,s,norb,numelec,elec_orb
 
 
@@ -295,10 +368,14 @@ def calc_coupling(h,s,h1,h2,s1,s2,coupled,elec_units):
 
 #The routines below are for creating inputs/calling/getting data from RUQT-Fortran transport calculations from pyRUQT
 
-#These routines extract detailed paritioning data from RUQT-Fortan (currently unused).
+#This routine is for writing pyscf data to a ".scf_data" datafile for RUQT-Fortran
+
+
+
+#These routines extract detailed paritioning data from RUQT-Fortan for debugging purposes (currently unused).
 def read_ruqtfortran_partdat(ruqt_dir,ruqt_file,elec_units):
  import numpy as np
- with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
+ with open(ruqt.dir+ruqt_file+".partdat",'r') as matrixfile:
   line=matrixfile.readline()
   line_data=line.split()
   size_l=int(line_data[0])
@@ -364,7 +441,7 @@ def read_ruqtfortran_partdat(ruqt_dir,ruqt_file,elec_units):
 
 def read_ruqtfortran_sigma(ruqt_dir,ruqt_file,elec_units):
    
- with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
+ with open(ruqt.dir+ruqt_file+".partdat",'r') as matrixfile:
   line=matrixfile.readline()
   line_data=line.split()
   size_l=int(line_data[0])
@@ -397,8 +474,9 @@ def read_ruqtfortran_sigma(ruqt_dir,ruqt_file,elec_units):
 
 
 #The next two functions create RUQT-Fortran inputs and run RUQT.x calculations
-def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,min_trans_energy,max_trans_energy,delta_energy,qc_method,rdm_type,exmol_dir,exmol_file,exmol_prog,num_elec_atoms,outputfile,state_num,norb,numelec):
+def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,min_trans_energy,max_trans_energy,delta_energy,qc_method,rdm_type,exmol_dir,exmol_file,exmol_prog,num_elec_atoms,outputfile,state_num,norb,numelec,size_elec):
  import string
+ import math
 
 #This part converts the python variables to ones reconized by the Fortran code
  if cal_typ == "T":
@@ -442,6 +520,10 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
   numvirt=norb-numocc
  elif exmol_prog=="maple":
   norb,numocc,numvirt,size_ex,size_elec=orb_read_scfdat(exmol_dir,exmol_file,num_elec,outputfile)
+ elif exmol_prog=="pyscf":
+  numocc=math.ceil(numelec/2)
+  numvirt=norb-numocc
+  size_ex=norb-2*size_elec
 
 #This part writes the options to the input file for the RUQT Fortran code
  negf_inp = open("fort_ruqt",'w')
@@ -481,7 +563,7 @@ def fort_calc(ruqt_exe,calcname,energies,bias,calc_type,outputfile):
  import subprocess,string
  import numpy as np
  #This routine calls the RUQT Fortran transport calculator
- #Make sure to have a working RUQT.x executable compiled from the Github source code (ruqt_engine branch)
+ #Make sure to have a working RUQT.x executable compiled from the Github source code (ruqt.engine branch)
 
  run_com=ruqt_exe+' '+calcname
  

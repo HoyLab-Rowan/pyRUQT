@@ -8,41 +8,6 @@ import sys
 class sie_negf:
  def __init__(self, **kwargs):
 
-  """
-  Parameters for semi-infinite electrode calculation using ASE
-
-  Keywords Required Each Calculation:
-  ouput : str
-  exmol_dir : {None,str}
-  elec_dir : {None,str}
-
-  Calculation Dependent or Optional Keywords:
-  exmol_prog : {"molcas",str}, optional
-  elec_prog : {"molcas",str},optional
-  run_molcas : {False,bool}, optional
-  min_trans_energy : {-2.0,float},optional
-  max_trans_energy : {2.0,float},optional
-  delta_energy : {0.01,float},optional
-  min_bias : {-2.0,float},optional
-  max_bias : {2.0,float},optional
-  delta_bias : {0.1,float},optioinal
-  full_align : {True,bool},optional
-  dft_functional : {"pbe",str},optional
-  basis_set : {"lanl2dz",str},optional
-  ecp : {"lanl2dz",None,str},optional
-  n_elec_units : {2,int},optional
-  exmol_geo : {None,str},optional
-  elec_geo : {None,str},optional
-  state_num : {1,int},optional
-  state_num_e : {1,int},optional
-  coupling_calc : {"none",str},optional
-  coupled : {"coupled",str},optional
-  spin_pol : {False,logical},optional
-  align_elec : {0,int},optional
-  dos_calc : {False,bool},optional
-  fd_change : {0.001,float},optional
-  ase_current: False,bool}, optional
-  """
   self.input_parameters = {'output'    : "pyruqt_results",
                           'exmol_prog' : "molcas",
                           'exmol_dir'  : None,
@@ -59,8 +24,8 @@ class sie_negf:
                           'temp'         : 1E-5,
                           'full_align'   : True,
                           'dft_functional' : "pbe",
-                          'basis_set'  : "lanl2dz",
-                          'ecp'        : "lanl2dz",
+                          'basis_set'  : None,
+                          'ecp'        : None,
                           'n_elec_units'   : 2,
                           'exmol_geo'  : None,
                           'elec_geo'   : None,
@@ -76,7 +41,11 @@ class sie_negf:
                           'ase_current'   : False,
                           'elec_size'     : [0,0],
                           'conv_tol'      : 1E-7,
-                          'max_iter'      : 100}
+                          'max_iter'      : 100,
+                          'pyscf_pbc'     : False,
+                          'lattice_v'     : None,
+                          'meshnum'        : 10,
+                          'verbosity'     : 2}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -118,7 +87,10 @@ class sie_negf:
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+   if inp['pyscf_pbc']==True:
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+   else:
+    h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -127,13 +99,21 @@ class sie_negf:
    else:
     h2=None
     s2=None
+
   elif inp['elec_prog']=="pyscf":
-   h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+   if inp['pyscf_pbc']==True:
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+   else:
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    if inp['elec2_geo']!=None:
-    h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+    if inp['pyscf_pbc']==True:
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+    else:
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    else:
     h2=None
     s2=None
+
   elif inp['elec_prog']=="supercell":
    l_elec=inp['elec_size'][0]
    r_elec=inp['elec_size'][1]
@@ -233,7 +213,7 @@ class sie_negf:
 class wbl_negf:
  def __init__(self, **kwargs):
   
-  self.input_parameters = {'output'     : "pyruqt_results",
+  self.input_parameters = {'output'     : "pyruqt.results",
                           'exmol_dir'  : None,
                           'num_elec_atoms' : None,
                           'exmol_prog' : "molcas",
@@ -245,9 +225,9 @@ class wbl_negf:
                           'max_bias'     : 2,
                           'delta_bias'   : 0.1,
                           'temp'         : 1E-5,
-                          'dft_functional' : "pbe",
-                          'basis_set'  : "lanl2dz",
-                          'ecp'        : "lanl2dz",
+                          'dft_functional' : None,
+                          'basis_set'  : None,
+                          'ecp'        : None,
                           'exmol_geo'  : None,
                           'state_num'  : 1,
                           'FermiE'     :-5.30,
@@ -295,14 +275,14 @@ class wbl_negf:
   elif inp['exmol_prog']=="pyscf":
    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'])
 
-  return(energies,bias,outputfile,h,s,norb,numelec)
+  return(energies,bias,outputfile,h,s,norb,numelec,elec_orb)
 
  def transmission(self):
   inp=self.input_parameters
-  energies,bias,outputfile,h,s,norb,numelec=wbl_negf.calc_setup(self)
+  energies,bias,outputfile,h,s,norb,numelec,elec_orb=wbl_negf.calc_setup(self)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
-  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec)
+  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
@@ -311,7 +291,7 @@ class wbl_negf:
   plt.clf()
 
  def current(self):
-  energies,bias,outputfile,h,s,norb,numelec=wbl_negf.calc_setup(self)
+  energies,bias,outputfile,h,s,norb,numelec,elec_orb=wbl_negf.calc_setup(self)
   inp=self.input_parameters
   print("Performing a Landauer current calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
@@ -320,12 +300,12 @@ class wbl_negf:
   print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
   if inp['fort_trans']==False:
-   ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec)
+   ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
    T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"C",outputfile)
 
   elif inp['fort_trans']==True:
    print("Calculating current with ASE transport",file=outputfile)
-   ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec)
+   ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
    T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
    
    h=np.zeros((2,2))
@@ -362,7 +342,7 @@ class wbl_negf:
 
 
  def diff_conductance(self):
-  energies,bias,outputfile,h,s,norb,numelec=wbl_negf.calc_setup(self)
+  energies,bias,outputfile,h,s,norb,numelec,elec_orb=wbl_negf.calc_setup(self)
   inp=self.input_parameters
   print("Calculating differential conductance using numerical derivatives",file=outputfile)
   print("Calculting each value using the +/-"+str(inp['fd_change'])+" voltage points around it.",file=outputfile)
@@ -372,7 +352,7 @@ class wbl_negf:
   print("Final diff. conductance values will be printed to "+inp['output']+".dcon"+" in volts vs G_0",file=outputfile) 
 
   print("Not available in RUQT-Fortran. Using RUQT-Fortan transmission with pyRUQT DiffCond calculator.",file=outputfile)
-  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'])
+  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')

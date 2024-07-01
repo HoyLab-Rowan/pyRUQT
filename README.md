@@ -1,10 +1,8 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
-Update (4/30/2024): Added tools folder with additional calculators for pyRUQT
 
-Update (8/25/2023): Support added for supercell calculations which removes the need for a separate electrode calculation when using sie_negf class. Activate using elec_prog="supercell" and include the number of orbitals in each electrode in the supercell via the elec_size=[X1,X2] keyword where X1 and X2 is the number of orbitals in left and right electrodes respectively.
+Update (7/1/2024): Added ability to run PySCF calculations with periodic boundary conditions through pyRUQT and added the ability to use PySCF (with and without PBC) as a calculator for the wbl_negf module, a new KEYWORD file with detailed explanations of all sie_negf keywords, this changelog file, and minor bugfixes/updates to wbl_negf.
 
-Update (5/8/2023): General bug fixs/improvements. New Current Calculator and support for non-identical electrodes
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
@@ -16,7 +14,7 @@ Each currently supported NEGF engine types (ASE and RUQT-Fortran) offer a differ
 
 1. ASE Transport Engine (sie_negf class): Semi-infinite leads determined with an efficient decimation technique to determine Fermi level, device/electrode 
 interactions, and coupling (see Paper #2). Separate Hamiltonian and Overlap matrices for the extended molecule and repeating electrode blocks are used to 
-construct the Green's functions.
+construct the Green's functions unless using the supercell option.
 
 2. RUQT-Fortran Transport Engine (wbl_negf class): Metal wide band limit approximation with user provided Fermi level and coupling constants (Papers 1 & 3). Only 1 
 Hamiltonian and Overlap matrix is used to contruct the Green's Functions which are divided by program into the electrode and extended molecule regions 
@@ -26,9 +24,10 @@ This software runs the standard Landuaer current, conductance, and zero-bias tra
 
 New Calculation Types:
   1. Differential Conductance (using both RUQT-Fortran and ASE engines)
+  2. Supercell calculations with ASE (no separate electrode required)
     
 New features:
-  1.  Automatically run simple Molcas MC-PDFT and pySCF DFT calculations from pyRUQT for transport calculations
+  1.  Automatically run simple Molcas MC-PDFT and pySCF DFT calculations (with or without periodic boundary conditions) from pyRUQT for transport calculations
   2.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
   3.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
   4.  Automatic plotting of transport results in PNG format
