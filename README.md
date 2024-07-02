@@ -1,7 +1,7 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
-Update (7/1/2024): Added ability to run PySCF calculations with periodic boundary conditions through pyRUQT and added the ability to use PySCF (with and without PBC) as a calculator for the wbl_negf module, a new KEYWORD file with detailed explanations of all sie_negf keywords, this changelog file, and minor bugfixes/updates to wbl_negf.
+Update (7/1/2024): Added ability to run PySCF calculations with periodic boundary conditions through pyRUQT and added the ability to use PySCF (without PBC) as a calculator for the wbl_negf module, a new KEYWORD file with detailed explanations of all sie_negf keywords, this changelog file, and minor bugfixes/updates to wbl_negf.
 
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 

@@ -44,8 +44,10 @@ class sie_negf:
                           'max_iter'      : 100,
                           'pyscf_pbc'     : False,
                           'lattice_v'     : None,
-                          'meshnum'        : 10,
-                          'verbosity'     : 2}
+                          'meshnum'       : None,
+                          'verbosity'     : 2,
+                          'cell_dim'      : 1,
+                          'pbc_spin'      : None}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -88,7 +90,7 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
    else:
     h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
 
@@ -102,12 +104,12 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
    else:
     h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'])
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
     else:
      h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    else:

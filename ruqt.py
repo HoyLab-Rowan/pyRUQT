@@ -197,13 +197,17 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
  from pyscf.pbc import df as pdf
 
- cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)],verbose=verbosity,dimension=1)
+ if meshnum != None:
+  mesh_vec=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)]
+ else:
+  mesh_vec=None
+ cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=verbosity,dimension=cell_dim,spin=pbc_spin)
 
  #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
  pbc_elec=pbcdft.RKS(cell).set(max_cycle=maxiter,conv_tol=convtol)
@@ -224,6 +228,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v
  norb=len(h_scf)
  numelec=int(np.sum(pbc_elec.mo_occ))
 
+ print ('NORB:',norb,'NUMELEC:',numelec)
  return h_scf,s,norb,numelec
 
 def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter):
