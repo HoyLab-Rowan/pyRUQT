@@ -2,10 +2,10 @@
 Format= Keyword : {Default Value,Type} : Explaination of Keyword : Options/Context
 
 ***Keywords That Generaly Need Be Defined Each Calculation***
-  ouput     : {pyruqt_results,str} : Sets the filename to be used for all calculation outputfiles                                      : Define uniquely for each new calculation to avoid overwriting data
-  exmol_dir : {None,str}           : Defines location of extended molecular region geometry xyz file for pySCF or MolEl.dat for MOLCAS : Always needed
-  elec_dir  : {None,str}           : Defines location of the left electrode xyz file or MolEl.dat                                      : Not needed if elec_prog type is "supercell", Replaced by "elec_size"
-  elec2_dir : {None,str}           : Defines location of right electrode xyz/MolEl.dat if not same as left electrode                   : Can be omitted if electrodes are superimposable mirror images of each other
+output     : {pyruqt_results,str} : Sets the filename to be used for all calculation outputfiles                                      : Define uniquely for each new calculation to avoid overwriting data
+exmol_dir : {None,str}           : Defines location of extended molecular region geometry xyz file for pySCF or MolEl.dat for MOLCAS : Always needed
+elec_dir  : {None,str}           : Defines location of the left electrode xyz file or MolEl.dat                                      : Not needed if elec_prog type is "supercell", Replaced by "elec_size"
+elec2_dir : {None,str}           : Defines location of right electrode xyz/MolEl.dat if not same as left electrode                   : Can be omitted if electrodes are superimposable mirror images of each other
 
 ***Calculation Dependent or Optional Keywords***
 
