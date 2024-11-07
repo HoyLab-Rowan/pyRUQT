@@ -11,14 +11,15 @@ import string,subprocess
 
 #Calculates differental conductance
 def get_diffcond(calc,bias,temp,energies,T,fd_change,ase_current,delta_e):
+ #from ruqt import get_current
  p_bias=bias+fd_change
  n_bias=bias-fd_change
  if ase_current==True:
   I_p=calc.get_current(p_bias,T=temp,E=energies,T_e=T)
   I_n=calc.get_current(n_bias,T=temp,E=energies,T_e=T)
  else:
-  I_p=ruqt.get_current(p_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
-  I_n=ruqt.get_current(n_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
+  I_p=get_current(p_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
+  I_n=get_current(n_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
  b_range=len(bias)
  DE=np.zeros(b_range)
  for x in range(b_range):
@@ -103,13 +104,13 @@ def orb_read_molcas(data_dir,exmol_molcasd,datafile,num_elec,outputfile):
  line=filesearch2.readline()
  line_data=line.split()
 
- while "2" not in line_data[1]:
+ while str(num_elec+1) not in line_data[1]:
   line=filesearch2.readline()#  line_data=line.split()
   line_data=line.split()
   if not line:
    print("Fatal Error: Can not find electrode orbital number")
    break
- size_elec=num_elec*(int(line_data[0]))
+ size_elec=line_data[0]-1#num_elec*(int(line_data[0]))
  size_ex=norb-2*size_elec
 
  filesearch.close
@@ -126,13 +127,13 @@ def read_syminfo(data_dir,norb,num_elec,outputfile):
  line=filesearch2.readline()
  line_data=line.split()
 
- while "2" not in line_data[1]:
+ while str(num_elec+1) not in line_data[1]:
   line=filesearch2.readline()#  line_data=line.split()
   line_data=line.split()
   if not line:
    print("Fatal Error: Can not find electrode orbital number",file=outputfile)
    break
- size_elec=num_elec*(int(line_data[0]))
+ size_elec=int(line_data[0])-1 #num_elec*(int(line_data[0]))
  size_ex=norb-2*size_elec
 
  filesearch2.close
@@ -197,7 +198,7 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin,aux_basis):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
@@ -210,13 +211,11 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v
  cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=verbosity,dimension=cell_dim,spin=pbc_spin)
 
  #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
- pbc_elec=pbcdft.RKS(cell).set(max_cycle=maxiter,conv_tol=convtol)
+ pbc_elec=pbcdft.RKS(cell).set(max_cycle=maxiter,conv_tol=convtol,exp_to_discard=0.1)
  #print(pbc_elec.kpts)
- pbc_elec.with_df=pdf.DF(cell)
- if ecp == None:
-  pbc_elec.with_df.auxbasis='weigend'
- else:
-   pbc_elec.with_df.auxbasis=ecp
+ pbc_elec.with_df=pdf.GDF(cell)
+ pbc_elec.with_df.auxbasis=aux_basis
+ #pbc_elec.ecp=ecp
  #pbc_elec.with_df._cderi_to_save='test_save'
  pbc_elec.xc=dft_functional
  #pbc_elec.incore_anyway=True
@@ -229,6 +228,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v
  numelec=int(np.sum(pbc_elec.mo_occ))
 
  print ('NORB:',norb,'NUMELEC:',numelec)
+ print ('h_scf:',h_scf)
  return h_scf,s,norb,numelec
 
 def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter):

@@ -47,7 +47,10 @@ class sie_negf:
                           'meshnum'       : None,
                           'verbosity'     : 2,
                           'cell_dim'      : 1,
-                          'pbc_spin'      : None}
+                          'pbc_spin'      : None,
+                          'aux_basis'     : None,
+                          'pdos_states'   : [],
+                          'eigenchannels' : 0}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -90,7 +93,7 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
    else:
     h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
 
@@ -104,12 +107,12 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
    else:
     h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'])
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
     else:
      h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
    else:
@@ -147,15 +150,74 @@ class sie_negf:
   if inp['align_elec']>=1:
    inp['align_elec']-=1
    print("Aligning the "+str(inp['align_elec'])+" element of both electrode and extended molecule",file=outputfile)
-   calc = transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'])
+   calc = transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",align_bf=inp['align_elec'],pdos=inp['pdos_states'],eigenchannels=inp['eigenchannels'])
   elif inp['align_elec']<1:
-   calc=transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans")
+   calc=transport.TransportCalculator(h=h, h1=h1,h2=h2, s=s, s1=s1,s2=s2,hc1=hc1,sc1=sc1,hc2=hc2,sc2=sc2, energies=energies,dos=inp['dos_calc'],logfile=inp['output']+".trans",pdos=inp['pdos_states'],eigenchannels=inp['eigenchannels'])
   T = calc.get_transmission()
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
   plt.ylabel('Transmission (rel)')
   plt.savefig(inp['output']+"_trans.png")
   plt.clf()
+
+#Automatic printing and plotting routines for Total and Projected Density of States
+  if inp['dos_calc']==True or inp['pdos_states']!=[]:
+   dosfile=open(inp['output']+".dos",'w')
+  if inp['dos_calc']==True:
+   print("Calculating Total DOS",file=outputfile)
+   d_plot=plt.plot(energies,calc.dos_e)
+   plt.xlabel('E-E(Fermi) (eV)')
+   plt.ylabel('Density of States')
+   plt.savefig(inp['output']+"_dos.png")
+   plt.clf()
+   print("Total DOS",len(calc.dos_e),file=dosfile)
+   temp=0
+   while temp <= len(energies)-1:
+    print(energies[temp],calc.dos_e[temp],file=dosfile)
+    temp+=1
+    if temp > len(energies):
+     break
+
+  if inp['pdos_states']!=[]:
+   pdos_len=len(inp['pdos_states'])
+   print("Plotting PDOS States:"+str(pdos_len),file=outputfile)
+   vec=0
+   pdos_ne_comb=np.zeros(len(energies))
+   while vec <= pdos_len-1:
+    #print(str(calc.pdos_ne.shape),file=outputfile)
+    d_plot=plt.plot(energies,calc.pdos_ne[vec,:])
+    plt.xlabel('E-E(Fermi) (eV)')
+    plt.ylabel('Projected Density of States')
+    plt.savefig(inp['output']+"_pdos"+str(vec+1)+".png")
+    plt.clf()
+    print("PDOS State",inp['pdos_states'][vec],len(energies),file=dosfile)
+    temp=0
+    while temp <= len(energies)-1:
+     print(energies[temp],calc.pdos_ne[vec,temp],file=dosfile)
+     pdos_ne_comb[temp]+=calc.pdos_ne[vec,temp]
+     temp+=1
+     if temp > len(energies):
+      break
+    vec+=1
+    if pdos_len < 0 or vec > pdos_len:
+     break
+   print("PDOS Combined",file=dosfile)
+   for i in range(0,len(energies)-1):
+    print(energies[i],pdos_ne_comb[i],file=dosfile)
+   d_plot=plt.plot(energies,pdos_ne_comb)
+   plt.xlabel('E-E(Fermi) (eV)')
+   plt.ylabel('Projected Density of States')
+   plt.savefig(inp['output']+"_pdos_combined"+".png")
+   plt.clf()
+
+  #if inp['eigenchannels'] > 0:
+  # d_plot=plt.plot(energies,calc.dos_e)
+  # plt.xlabel('E-E(Fermi) (eV)')
+  # plt.ylabel('Eigenchannels')
+  # plt.savefig(inp['output']+"_eigen.png")
+  # plt.clf()
+
+
   return T,calc
 
  def current(self):
@@ -203,7 +265,7 @@ class sie_negf:
  
   T,calc=sie_negf.transmission(self)
 
-  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'])
+  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'],inp['ase_current'],inp['delta_energy'])
 
   c_plot=plt.plot(bias,DE)
   plt.xlabel('Voltage (V)')
@@ -273,6 +335,7 @@ class wbl_negf:
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   elec_orb=0
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'])
@@ -366,7 +429,7 @@ class wbl_negf:
   h1=np.zeros((2,2))
   calc = transport.TransportCalculator(h=h, h1=h1, energies=energies,logfile="temp")
 
-  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'],inp['ase_current'])
+  DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'],inp['ase_current'],inp['delta_energy'])
   c_plot=plt.plot(bias,DE)
   plt.xlabel('Voltage (V)')
   plt.ylabel('Diff. Conductance (G_0)')
