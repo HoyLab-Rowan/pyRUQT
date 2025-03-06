@@ -10,7 +10,7 @@ class sie_negf:
 
   self.input_parameters = {'output'    : "pyruqt_results",
                           'exmol_prog' : "molcas",
-                          'exmol_dir'  : None,
+                          'exmol_dir'  : "./",
                           'elec_prog'  : "molcas",
                           'elec_dir'   : None,
                           'elec2_dir'  : None,
@@ -278,7 +278,7 @@ class wbl_negf:
  def __init__(self, **kwargs):
   
   self.input_parameters = {'output'     : "pyruqt.results",
-                          'exmol_dir'  : None,
+                          'exmol_dir'  : "./",
                           'num_elec_atoms' : None,
                           'exmol_prog' : "molcas",
                           'run_molcas'  : False,
