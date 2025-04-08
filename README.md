@@ -1,8 +1,7 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
-Update (7/1/2024): Added ability to run PySCF calculations with periodic boundary conditions through pyRUQT and added the ability to use PySCF (without PBC) as a calculator for the wbl_negf module, a new KEYWORD file with detailed explanations of all sie_negf keywords, this changelog file, and minor bugfixes/updates to wbl_negf.
-
+(4/7/2025): Added ability to run MC-PDFT calculations using PySCF. Created new pyscf_settings keyword (see pyscf_mcpdft_example.py script in examples folder for details on how to use). Currently requires installing pyscf-forge in addition to PySCF: https://github.com/pyscf/pyscf-forge
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
@@ -27,7 +26,7 @@ New Calculation Types:
   2. Supercell calculations with ASE (no separate electrode required)
     
 New features:
-  1.  Automatically run simple Molcas MC-PDFT and pySCF DFT calculations (with or without periodic boundary conditions) from pyRUQT for transport calculations
+  1.  Automatically run MC-PDFT (Pyscf and Molcas) and DFT(PySCF) calculations (with or without periodic boundary conditions) from pyRUQT for transport calculations
   2.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
   3.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
   4.  Automatic plotting of transport results in PNG format
@@ -50,6 +49,7 @@ Electronic Structure Calculator Options. Only 1 of the following are required bu
     OpenMolcas(sandx_fock branch) installation (best run as separate calculations but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
 
     PySCF (enables non-Molcas NEGF-DFT calculations and mixed DFT/PDFT transport calculations by pyRUQT) from https://pyscf.org/
+	*To use PySCF-based MC-PDFT, pyscf_forge must also be installed: https://github.com/pyscf/pyscf-forge
 
 Quick Installation (for now, Python package install coming in future)
 
