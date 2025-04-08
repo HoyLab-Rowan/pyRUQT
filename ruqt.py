@@ -1,9 +1,10 @@
 import numpy as np
 import scipy
-from pyscf import gto,dft,scf
+from pyscf import gto,dft,scf,mcpdft,lo
 from ase import transport,Atoms,units
 import matplotlib.pyplot as plt
 import string,subprocess
+from functools import reduce
 
 #This is the main module file for the pyRUQT program which contains all functions needed to run pyRUQT.
 
@@ -11,7 +12,6 @@ import string,subprocess
 
 #Calculates differental conductance
 def get_diffcond(calc,bias,temp,energies,T,fd_change,ase_current,delta_e):
- #from ruqt import get_current
  p_bias=bias+fd_change
  n_bias=bias-fd_change
  if ase_current==True:
@@ -198,7 +198,7 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin,aux_basis):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin,aux_basis,pyscf_settings):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
@@ -231,44 +231,197 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v
  print ('h_scf:',h_scf)
  return h_scf,s,norb,numelec
 
-def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter):
+def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter,pyscf_settings):
  #from pyscf import gto,dft,scf 
- geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
- rks_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
- rks_elec.xc=dft_functional
- rks_elec.kernel() 
- if rks_elec.converged==False:
-  rks_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
-  #scf.addons.dynamic_level_shift_(rks_elec,factor=0.5)
-  rks_elec.damp=0.5
-  rks_elec.diis_start_cycle=2
-  rks_elec.kernel()  
- h = rks_elec.get_fock()
- h=h*27.2114
- s = rks_elec.get_ovlp()
+
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5])
+ if pyscf_settings[0]=="dft":
+  if pyscf_settings[3]=="rks":
+   pyscf_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.xc=dft_functional
+   pyscf_elec.kernel() 
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()  
+   if pyscf_elec.converged==False:
+    print("Your SCF calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+   h = pyscf_elec.get_fock()
+   h=h*27.2114
+   s = pyscf_elec.get_ovlp()
+   #norb=len(h)
+   #numelec=int(np.sum(pyscf_elec.mo_occ))
+
+ elif pyscf_settings[0]=="mcpdft":
+  #Pyscf mcpdft routine modified from original version created by Dr. Andrew Sand (Butler University)
+  [nActEl,nAct]=pyscf_settings[2]
+  if pyscf_settings[3]=="rks":
+   #SCF DFT run
+   pyscf_elec = dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.xc = dft_functional
+   pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    print("Your SCF RKS calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+
+  elif pyscf_settings[3]=="rhf":
+   #If we would rather, we could run Hartree-Fock as the pre-MR step.
+   pyscf_elec = scf.RHF(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.init_guess = 'huckel'
+   #pyscf_elec.xc = dft_functional
+   pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    print("Your SCF RHF calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+
+  else:
+    print("SCF method not recognized. Use rks or rhf keywords.")
+    exit()
+
+  #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
+  print("Using t "+pyscf_settings[4]+" for MCPDFT functional")
+  if pyscf_settings[1]=="casscf":
+   mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl).run()
+  elif pyscf_settings[1]=="casci":
+   mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl).run()
+  else:
+   print("MCSCF method not recognized. Use casscf or casci keywords.")
+   exit()
+
+  #The remainder of this file builds the PDFT fock matrix in an ao basis
+  #The next two lines build the wave function-like parts of the fock matrix.
+  dm = mc.make_rdm1()
+  F = mc.get_hcore () + mc._scf.get_j(mc,dm)
+  #The next lines handle the potential contributions (PDFT part) to the fock matrix.
+  mc_pot, mc_pot2 = mc.get_pdft_veff()
+  h_new = F + mc_pot
+  #Now get overlap matrix
+  h=np.array(h_new)
+  s = pyscf_elec.get_ovlp()
+
  norb=len(h)
- numelec=int(np.sum(rks_elec.mo_occ))
+ numelec=int(np.sum(pyscf_elec.mo_occ))
+ #These routines print the data to a MolEl.dat file for use in reruns
+ nTotEl = geo.nelec[0]+ geo.nelec[1]
+ nAO = mc.mo_coeff.shape[1]
+ mo_coef = mc.mo_coeff
+ print_molel(h,s,norb,numelec,nTotEl,nAct,nActEl,nAO,mo_coef)
+ h=h*27.211396641308
+
  return h,s,norb,numelec
 
-def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_atoms):
+def print_molel(h,s,norb,numelec,nTotEl,nAct,nActEl,nAO,mo_coef): 
+ f = open("MolEl.dat", "w")
+ f.write("Number of states,orbitals,electrons,ActOrb,ActEl \n")
+ f.write("1 " + str(mo_coef.shape[1]) + " " + str(nTotEl) + " " + str(nAct) + " " + str(nActEl) + '\n')
+
+
+ f.write("Overlap Matrix (AO) \n")
+ for x in range(nAO):
+    for y in range(x + 1):
+        f.write(f'{x + 1} {y + 1} {s[x][y]} \n')
+
+ f.write("Molecular orbital coefficients \n")
+ for x in range(nAO):
+    for y in range(nAO):
+        f.write(f'{x + 1} {y + 1} {mo_coef[x][y]} \n')
+
+ for x in range(nAO):
+    for y in range(nAO):
+        f.write(f'{x + 1} {y + 1} {h[x][y]} \n')
+
+def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_atoms,pyscf_settings):
  #from pyscf import gto,dft,scf
- geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=4)
- rks_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
- rks_elec.small_rho_cutoff=1e-48
- rks_elec.xc=dft_functional
- rks_elec.kernel()
- if rks_elec.converged==False:
-  rks_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
-  #scf.addons.dynamic_level_shift_(rks_elec,factor=0.5)
-  rks_elec.damp=0.5
-  rks_elec.diis_start_cycle=2
-  rks_elec.kernel()
- h = rks_elec.get_fock()
- s = rks_elec.get_ovlp()
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5])
+
+ if pyscf_settings[0]=="dft":
+  if pyscf_settings[3]=="rks":
+   pyscf_elec=dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.xc=dft_functional
+   pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    print("Your SCF calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+   h = pyscf_elec.get_fock()
+   s = pyscf_elec.get_ovlp()
+
+ elif pyscf_settings[0]=="mcpdft":
+  #Pyscf mcpdft routine modified from original version created by Dr. Andrew Sand (Butler University)
+  [nActEl,nAct]=pyscf_settings[2]
+  if pyscf_settings[3]=="rks":
+   #SCF DFT run
+   pyscf_elec = dft.RKS(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.xc = dft_functional
+   pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RKS(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    print("Your SCF RKS calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+
+  elif pyscf_settings[3]=="rhf":
+   #If we would rather, we could run Hartree-Fock as the pre-MR step.
+   pyscf_elec = scf.RHF(geo).set(max_cycle=maxiter,conv_tol=convtol)
+   pyscf_elec.init_guess = 'huckel'
+   #pyscf_elec.xc = dft_functional
+   pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    pyscf_elec=dft.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec.damp=0.5
+    pyscf_elec.diis_start_cycle=2
+    pyscf_elec.kernel()
+   if pyscf_elec.converged==False:
+    print("Your SCF RHF calculation did not converge after 2 attempts. Check your settings.")
+    exit()
+
+  else:
+    print("SCF method not recognized. Use rks or rhf keywords.")
+    exit()
+
+  #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
+  print("Using t "+pyscf_settings[4]+" for MCPDFT functional")
+  if pyscf_settings[1]=="casscf":
+   mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl).run()
+  elif pyscf_settings[1]=="casci":
+   mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl).run()
+  else:
+   print("MCSCF method not recognized. Use casscf or casci keywords.")
+   exit()
+
+  #The remainder of this file builds the PDFT fock matrix in an ao basis
+  #The next two lines build the wave function-like parts of the fock matrix.
+  dm = mc.make_rdm1()
+  F = mc.get_hcore () + mc._scf.get_j(mc,dm)
+  #The next lines handle the potential contributions (PDFT part) to the fock matrix.
+  mc_pot, mc_pot2 = mc.get_pdft_veff()
+  h = F + mc_pot
+  #Now get overlap matrix
+  s = pyscf_elec.get_ovlp()
 
  #This part determines the total number of orbitals, number of electrons, and orbitals in the electrodes (assumes symmetric electrodes)
  norb=len(h)
- numelec=int(np.sum(rks_elec.mo_occ))
+ numelec=int(np.sum(pyscf_elec.mo_occ))
  ao_data=gto.mole.ao_labels(geo,fmt=False)
  
  atom_num=0
@@ -282,24 +435,24 @@ def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_
    print("The # of electrode atoms is incorrect")
    break
  elec_orb=ao_index-1
- print("printing h")
- print(h)
- print("printing s")
- print(s)
+ #print("printing h")
+ #print(h)
+ #print("printing s")
+ #rint(s)
  #This section writes the H and S matrices to a standard ".scf_dat" file for RUQT-Fortran to use
  scffile=open("fort_ruqt"+".scf_dat",'w')
- mo_dim=rks_elec.mo_coeff.shape
+ mo_dim=pyscf_elec.mo_coeff.shape
  f_dim=h.shape
  o_dim=s.shape
 
  scffile.write('Molecular Orbital Coefficients'+"\n")
  for x in range(0,mo_dim[0]):
   for y in range(0,mo_dim[1]):
-   scffile.write("{0}".format(x+1)+" "+"{0}".format(y+1)+" "+"{0}".format(rks_elec.mo_coeff[x,y])+"\n")
+   scffile.write("{0}".format(x+1)+" "+"{0}".format(y+1)+" "+"{0}".format(pyscf_elec.mo_coeff[x,y])+"\n")
 
  scffile.write('Molecular Orbital Energies'+"\n")
  for x in range(0,mo_dim[0]):
-  scffile.write("{0}".format(rks_elec.mo_energy[x])+"\n")
+  scffile.write("{0}".format(pyscf_elec.mo_energy[x])+"\n")
 
  scffile.write('Overlap Matrix'+"\n")
  for x in range(0,o_dim[0]):
@@ -373,14 +526,10 @@ def calc_coupling(h,s,h1,h2,s1,s2,coupled,elec_units):
 
 #The routines below are for creating inputs/calling/getting data from RUQT-Fortran transport calculations from pyRUQT
 
-#This routine is for writing pyscf data to a ".scf_data" datafile for RUQT-Fortran
-
-
-
 #These routines extract detailed paritioning data from RUQT-Fortan for debugging purposes (currently unused).
 def read_ruqtfortran_partdat(ruqt_dir,ruqt_file,elec_units):
  import numpy as np
- with open(ruqt.dir+ruqt_file+".partdat",'r') as matrixfile:
+ with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
   line=matrixfile.readline()
   line_data=line.split()
   size_l=int(line_data[0])
@@ -446,7 +595,7 @@ def read_ruqtfortran_partdat(ruqt_dir,ruqt_file,elec_units):
 
 def read_ruqtfortran_sigma(ruqt_dir,ruqt_file,elec_units):
    
- with open(ruqt.dir+ruqt_file+".partdat",'r') as matrixfile:
+ with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
   line=matrixfile.readline()
   line_data=line.split()
   size_l=int(line_data[0])
@@ -483,7 +632,7 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
  import string
  import math
 
-#This part converts the python variables to ones reconized by the Fortran code
+#This part converts the python variables to ones recognized by the Fortran code
  if cal_typ == "T":
   Calc_Type="transmission"
  elif cal_typ == "C":

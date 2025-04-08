@@ -12,6 +12,7 @@ class sie_negf:
                           'exmol_prog' : "molcas",
                           'exmol_dir'  : "./",
                           'elec_prog'  : "molcas",
+                          'pyscf_settings': ["dft","casci",[2,2],"rks","pbe",5],
                           'elec_dir'   : None,
                           'elec2_dir'  : None,
                           'run_molcas'  : False,
@@ -23,7 +24,6 @@ class sie_negf:
                           'delta_bias'   : 0.1,
                           'temp'         : 1E-5,
                           'full_align'   : True,
-                          'dft_functional' : "pbe",
                           'basis_set'  : None,
                           'ecp'        : None,
                           'n_elec_units'   : 2,
@@ -78,8 +78,9 @@ class sie_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+inp['dft_functional']+" in "+inp['basis_set']+" basis set",file=outputfile)
-
+   print("Calculating extended molecular region using Pyscf with "+inp['pyscf_settings'][4]+" in "+inp['basis_set']+" basis set",file=outputfile)
+   if inp['pyscf_settings'][0]=="mcpdft":
+    print("Using Pyscf for an MC-PDFT calculation",file=outputfile)
   if inp['elec_prog']=="molcas":
    print("Using Molcas calculation at "+inp['elec_dir']+" for left electrode",file=outputfile)
    if inp['elec2_dir']!=None:
@@ -93,9 +94,9 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
    else:
-    h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+    h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -107,14 +108,14 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
    else:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'])
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
     else:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'])
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
    else:
     h2=None
     s2=None
@@ -171,11 +172,11 @@ class sie_negf:
    plt.savefig(inp['output']+"_dos.png")
    plt.clf()
    print("Total DOS",len(calc.dos_e),file=dosfile)
-   temp=0
-   while temp <= len(energies)-1:
-    print(energies[temp],calc.dos_e[temp],file=dosfile)
-    temp+=1
-    if temp > len(energies):
+   tempv=0
+   while tempv <= len(energies)-1:
+    print(energies[tempv],calc.dos_e[tempv],file=dosfile)
+    tempv+=1
+    if tempv > len(energies):
      break
 
   if inp['pdos_states']!=[]:
@@ -191,12 +192,12 @@ class sie_negf:
     plt.savefig(inp['output']+"_pdos"+str(vec+1)+".png")
     plt.clf()
     print("PDOS State",inp['pdos_states'][vec],len(energies),file=dosfile)
-    temp=0
-    while temp <= len(energies)-1:
-     print(energies[temp],calc.pdos_ne[vec,temp],file=dosfile)
-     pdos_ne_comb[temp]+=calc.pdos_ne[vec,temp]
-     temp+=1
-     if temp > len(energies):
+    tempv=0
+    while tempv <= len(energies)-1:
+     print(energies[tempv],calc.pdos_ne[vec,tempv],file=dosfile)
+     pdos_ne_comb[tempv]+=calc.pdos_ne[vec,tempv]
+     tempv+=1
+     if tempv > len(energies):
       break
     vec+=1
     if pdos_len < 0 or vec > pdos_len:
@@ -277,8 +278,9 @@ class sie_negf:
 class wbl_negf:
  def __init__(self, **kwargs):
   
-  self.input_parameters = {'output'     : "pyruqt.results",
+  self.input_parameters = {'output'     : "pyruqtresults",
                           'exmol_dir'  : "./",
+                          'pyscf_settings': ["dft","casci",[2,2],"rks","pbe",5],
                           'num_elec_atoms' : None,
                           'exmol_prog' : "molcas",
                           'run_molcas'  : False,
@@ -289,7 +291,6 @@ class wbl_negf:
                           'max_bias'     : 2,
                           'delta_bias'   : 0.1,
                           'temp'         : 1E-5,
-                          'dft_functional' : None,
                           'basis_set'  : None,
                           'ecp'        : None,
                           'exmol_geo'  : None,
@@ -331,14 +332,14 @@ class wbl_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+inp['dft_functional']+" in "+inp['basis_set']+" basis set",file=outputfile)
+   print("Calculating extended molecular region using Pyscf with "+inp['pyscf_settings'][4]+" in "+inp['basis_set']+" basis set",file=outputfile)
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    elec_orb=0
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['dft_functional'],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'])
+   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'],inp['pyscf_settings'])
 
   return(energies,bias,outputfile,h,s,norb,numelec,elec_orb)
 
