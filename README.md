@@ -1,7 +1,7 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
-(4/7/2025): Added ability to run MC-PDFT calculations using PySCF. Created new pyscf_settings keyword (see pyscf_mcpdft_example.py script in examples folder for details on how to use). Currently requires installing pyscf-forge in addition to PySCF: https://github.com/pyscf/pyscf-forge
+(4/7/2025): Added ability to run MC-PDFT calculations using PySCF. Created new pyscf_settings keyword (see the pyscf_mcpdft_example.py script in examples folder for details on how to use). Currently requires installing pyscf-forge in addition to PySCF: https://github.com/pyscf/pyscf-forge
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
