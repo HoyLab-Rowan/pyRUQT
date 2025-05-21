@@ -61,7 +61,7 @@ n_elec_units  : {2,int}          : Number of repeating electrode units in the el
 
 *Supercell Calculations
 
-elec_size : {None,[int,int]} : Basis functions to be placed in the electrode regions for a supercell calculation in list format, [left,right] : Required if elec_prog="supercell"
+num_elec_atoms : {0,int} : Number of atoms to be to be placed in the electrode regions for a supercell calculation. Be sure to double-check the program's calculated number of electrode orbitals in .out file when using this option.: Required to be non-zero if elec_prog="supercell"
 
 
 **Molcas specific keywords,Use if either exmol_prog or elec_prog equal "molcas"**
@@ -100,3 +100,6 @@ lattice_v     : {None,float}    : List of the 3 lattice vectors in 1-D list form
 
 meshum        : {10,float}      : # of mesh points used by pySCF per lattice vector                          : Highly recommended to adjust from default
 verbosity     : {4,int}         : Degree of pySCF output                                                     : Recommended to use 2 for no output and 4 for useable output (must pipe script output to file via command line)
+
+*Additional PySCF keywords
+*To be added
