@@ -553,7 +553,7 @@ class es_calc:
                           'molel_read_dir' : "",
                           'scf_attempts'  : 1,
                           'diis_start_cycle' : 1,
-                          'scf_algo'      : "ediis",
+                          'scf_algo'      : "adiis",
                           'damping'       : 0,
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
