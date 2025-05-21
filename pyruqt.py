@@ -1,4 +1,5 @@
 from ase import transport,Atoms,units
+from pyscf import gto
 import matplotlib.pyplot as plt
 import numpy as np
 import ruqt
@@ -9,10 +10,9 @@ class sie_negf:
  def __init__(self, **kwargs):
 
   self.input_parameters = {'output'    : "pyruqt_results",
-                          'exmol_prog' : "molcas",
+                          'exmol_prog' : "pyscf",
                           'exmol_dir'  : "./",
-                          'elec_prog'  : "molcas",
-                          'pyscf_settings': ["dft","casci",[2,2],"rks","pbe",5],
+                          'elec_prog'  : "pyscf",
                           'elec_dir'   : None,
                           'elec2_dir'  : None,
                           'run_molcas'  : False,
@@ -39,18 +39,35 @@ class sie_negf:
                           'dos_calc'      : False,
                           'fd_change'     : 0.001,
                           'ase_current'   : False,
-                          'elec_size'     : [0,0],
+                          'num_elec_atoms': 0,
                           'conv_tol'      : 1E-7,
                           'max_iter'      : 100,
                           'pyscf_pbc'     : False,
                           'lattice_v'     : None,
                           'meshnum'       : None,
-                          'verbosity'     : 2,
+                          'verbosity'     : 5,
                           'cell_dim'      : 1,
                           'pbc_spin'      : None,
                           'aux_basis'     : None,
                           'pdos_states'   : [],
-                          'eigenchannels' : 0}
+                          'eigenchannels' : 0,
+                          'es_method'  : "mcpdft",
+                          'dft_functional' : "pbe",
+                          'mcscf_type'    : "casci",
+                          'scf_solver'    : "rks",
+                          'active_space'  : [2,2],
+                          'active_orb'    : [],
+                          'auto_as'       : False,
+                          'display_orbitals' : True,
+                          'read_mc_mo'    : False,
+                          'molel_read_dir' : "",
+                          'diis_start_cycle' : 1,
+                          'scf_algo'      : "adiis",
+                          'damping'       : 0,
+                          'level_shift'   : 0,
+                          'scf_guess'     : 'minao',
+                          'frac_occ'      : 'false',
+                          'molcas_supercell'      : False}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -65,6 +82,9 @@ class sie_negf:
   inp=self.input_parameters
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
+
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
  
   print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
   print("Using Atomic Simulation Environment to calculate electrode interactions and transport",file=outputfile)
@@ -78,8 +98,8 @@ class sie_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+inp['pyscf_settings'][4]+" in "+inp['basis_set']+" basis set",file=outputfile)
-   if inp['pyscf_settings'][0]=="mcpdft":
+   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4]+" in "+inp['basis_set']+" basis set",file=outputfile)
+   if pyscf_settings[0]=="mcpdft":
     print("Using Pyscf for an MC-PDFT calculation",file=outputfile)
   if inp['elec_prog']=="molcas":
    print("Using Molcas calculation at "+inp['elec_dir']+" for left electrode",file=outputfile)
@@ -94,9 +114,9 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
    else:
-    h,s,norb,numelec=ruqt.esc_pyscf(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
+    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -108,21 +128,45 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
    else:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
+    h1,s1,norb_le,numelec_le,elec_orb_le=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],inp['pyscf_settings'])
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
     else:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf(inp['elec_dir']+inp['elec_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['pyscf_settings'])
+     h2,s2,norb_re,numelec_re,elec_orb_re=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    else:
     h2=None
     s2=None
 
   elif inp['elec_prog']=="supercell":
-   l_elec=inp['elec_size'][0]
-   r_elec=inp['elec_size'][1]
+  l_elec=0
+  r_elec=0
+   if inp['exmol_prog']=="molcas":
+    if inp['molcas_supercell']==True:
+     size_ex,elec_orb=read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
+    else:
+     geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=basis_set,ecp=ecp) 
+     ao_data=gto.mole.ao_labels(geo2,fmt=False)
+     atom_num=0
+     ao_index=0
+     elec_orb=0
+     ao_data_len=len(ao_data)
+     while atom_num < inp['num_elec_atoms']:
+      atom_num=ao_data[ao_index][0]
+      ao_index+=1
+      if ao_index == ao_data_len:
+       print("The # of electrode atoms is incorrect")
+       break
+     elec_orb=ao_index-1
+
+    l_elec=elec_orb
+    r_elec=elec_orb
+   else:
+    l_elec=elec_orb
+    r_elec=elec_orb
+   print("Orbitals in Left and Right Electrode: "+str(elec_orb),file=outputfile)
    h1=h[:l_elec,:l_elec]
    h2=h[-r_elec:,-r_elec:]
    s1=s[:l_elec,:l_elec]
@@ -280,9 +324,8 @@ class wbl_negf:
   
   self.input_parameters = {'output'     : "pyruqtresults",
                           'exmol_dir'  : "./",
-                          'pyscf_settings': ["dft","casci",[2,2],"rks","pbe",5],
-                          'num_elec_atoms' : None,
-                          'exmol_prog' : "molcas",
+                          'num_elec_atoms' : 0,
+                          'exmol_prog' : "pyscf",
                           'run_molcas'  : False,
                           'min_trans_energy' : -2.0,
                           'max_trans_energy' : 2.0,
@@ -304,7 +347,27 @@ class wbl_negf:
                           'fd_change'  : 0.001,
                           'ase_current' : False,
                           'conv_tol'      : 1E-7,
-                          'max_iter'      : 100}
+                          'max_iter'      : 200,
+                          'verbosity'     : 5,
+                          'es_method'  : "mcpdft",
+                          'dft_functional' : "pbe",
+                          'mcscf_type'    : "casci",
+                          'scf_solver'    : "rks",
+                          'active_space'  : [2,2],
+                          'active_orb'    : [],
+                          'auto_as'       : False,
+                          'display_orbitals' : True,
+                          'read_mc_mo'    : False,
+                          'molel_read_dir' : "",
+                          'scf_attempts'  : 1,
+                          'diis_start_cycle' : 1,
+                          'use_chkfile'   : False,
+                          'scf_algo'      : "adiis",
+                          'damping'       : 0,
+                          'level_shift'   : 0,
+                          'scf_guess'     : 'minao',
+                          'frac_occ'      : 'false',
+                          'molcas_supercell'      : False}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -319,6 +382,10 @@ class wbl_negf:
   inp=self.input_parameters
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
+  
+
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
 
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
   print("Using RUQT-Fortran to calculate transport",file=outputfile)
@@ -332,14 +399,30 @@ class wbl_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+inp['pyscf_settings'][4]+" in "+inp['basis_set']+" basis set",file=outputfile)
+   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4]+" in "+inp['basis_set']+" basis set",file=outputfile)
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
-   elec_orb=0
+   if inp['molcas_supercell']==True:
+    elec_orb=0
+   else:
+    geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=basis_set,ecp=ecp)
+    ao_data=gto.mole.ao_labels(geo2,fmt=False)
+    atom_num=0
+    ao_index=0
+    elec_orb=0
+    ao_data_len=len(ao_data)
+    while atom_num < inp['num_elec_atoms']:
+     atom_num=ao_data[ao_index][0]
+     ao_index+=1
+     if ao_index == ao_data_len:
+      print("The # of electrode atoms is incorrect")
+      break
+    elec_orb=ao_index-1
+
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf_wbl(inp['exmol_dir']+inp['exmol_geo'],inp['pyscf_settings'][4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['num_elec_atoms'],inp['pyscf_settings'])
+   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],pyscf_settings,pyscf_conv_settings)
 
   return(energies,bias,outputfile,h,s,norb,numelec,elec_orb)
 
@@ -348,7 +431,7 @@ class wbl_negf:
   energies,bias,outputfile,h,s,norb,numelec,elec_orb=wbl_negf.calc_setup(self)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
-  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
+  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb,inp['molcas_supercell'])
   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
@@ -366,12 +449,12 @@ class wbl_negf:
   print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
   if inp['fort_trans']==False:
-   ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
+   ruqt.fort_inputwrite("C",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb,inp['molcas_supercell'])
    T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"C",outputfile)
 
   elif inp['fort_trans']==True:
    print("Calculating current with ASE transport",file=outputfile)
-   ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
+   ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb,inp['molcas_supercell'])
    T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
    
    h=np.zeros((2,2))
@@ -418,7 +501,7 @@ class wbl_negf:
   print("Final diff. conductance values will be printed to "+inp['output']+".dcon"+" in volts vs G_0",file=outputfile) 
 
   print("Not available in RUQT-Fortran. Using RUQT-Fortan transmission with pyRUQT DiffCond calculator.",file=outputfile)
-  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb)
+  ruqt.fort_inputwrite("T",inp['FermiE'],inp['FermiD'],inp['temp'],inp['max_bias'],inp['min_bias'],inp['delta_bias'],inp['min_trans_energy'],inp['max_trans_energy'],inp['delta_energy'],inp['qc_method'],inp['rdm_type'],inp['exmol_dir'],inp['fort_data'],inp['exmol_prog'],inp['num_elec_atoms'],outputfile,inp['state_num'],norb,numelec,elec_orb,inp['molcas_supercell'])
   T,I=ruqt.fort_calc("RUQT.x","fort_ruqt",energies,bias,"T",outputfile)
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
@@ -436,3 +519,82 @@ class wbl_negf:
   plt.ylabel('Diff. Conductance (G_0)')
   plt.savefig(inp['output']+"_diffcon.png")
   np.savetxt(inp['output']+".dcon",np.c_[bias,DE],fmt="%s")
+
+class es_calc:
+ def __init__(self, **kwargs):
+
+  self.input_parameters = {'output'    : "es_results",
+                          'es_prog' : "pyscf",
+                          'es_dir'  : "./",
+                          'basis_set'  : None,
+                          'ecp'        : None,
+                          'es_geo'  : None,
+                          'state_num'  : 1,
+                          'conv_tol'      : 1E-7,
+                          'max_iter'      : 100,
+                          'pyscf_pbc'     : False,
+                          'lattice_v'     : None,
+                          'meshnum'       : None,
+                          'verbosity'     : 5,
+                          'cell_dim'      : 1,
+                          'pbc_spin'      : None,
+                          'aux_basis'     : None,
+                          'pdos_states'   : [],
+                          'eigenchannels' : 0,
+                          'es_method'  : "mcpdft",
+                          'dft_functional' : "pbe",
+                          'mcscf_type'    : "casci",
+                          'scf_solver'    : "rks",
+                          'active_space'  : [2,2],
+                          'active_orb'    : [],
+                          'auto_as'       : False,
+                          'display_orbitals' : True,
+                          'read_mc_mo'    : False,
+                          'molel_read_dir' : "",
+                          'scf_attempts'  : 1,
+                          'diis_start_cycle' : 1,
+                          'scf_algo'      : "ediis",
+                          'damping'       : 0,
+                          'level_shift'   : 0,
+                          'scf_guess'     : 'minao',
+                          'frac_occ'      : 'false'}
+  self.param_update(**kwargs)
+
+ def param_update(self,**kwargs):
+  inp=self.input_parameters
+  for key in kwargs:
+   if key in inp:
+    inp[key] = kwargs[key]
+   elif key not in inp:
+    raise KeyError('%r not a vaild keyword. Please check your input parameters.' % key)
+
+ def single_point(self):
+  inp=self.input_parameters
+  outputfile=open(inp['output']+".out",'w')
+  sys.stderr=open(inp['output']+".err",'w')
+
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
+
+  print("Performing Standalone PySCF or MOLCAS calculation.",file=outputfile)
+  print("Running Calculation using the following paramaters:",file=outputfile)
+  print(self.input_parameters,file=outputfile)
+
+  if inp['es_prog']=="molcas":
+   print("Running Molcas calculation using geometry in "+inp['es_dir'],file=outputfile)
+   print("Calculating electronic state "+str(inp['state_num']),file=outputfile)
+  elif inp['es_prog']=="pyscf":
+   print("Using Pyscf for electronic structure calculation",file=outputfile)
+   if pyscf_settings[0]=="mcpdft":
+    print("Using Pyscf for an MC-PDFT calculation",file=outputfile)
+
+  if inp['es_prog']=="molcas":
+   print("Currently not supported. Calculator still in development.",file=outputfile)
+   #h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['es_prog'],"MolEl.dat",inp['state_num'],outputfile)
+  elif inp['es_prog']=="pyscf":
+   if inp['pyscf_pbc']==True:
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
+   else:
+    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],0,pyscf_settings,pyscf_conv_settings)
+
+  print("Single Point Calculation Complete. Check the .log and .err files for output data/errors.")

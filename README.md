@@ -50,7 +50,7 @@ Electronic Structure Calculator Options. Only 1 of the following are required bu
 
     PySCF (enables non-Molcas NEGF-DFT calculations and mixed DFT/PDFT transport calculations by pyRUQT) from https://pyscf.org/
 	*To use PySCF-based MC-PDFT, pyscf_forge must also be installed: https://github.com/pyscf/pyscf-forge
-
+       
 Quick Installation (for now, Python package install coming in future)
 
     Put the pyruqt.py and ruqt.py files in your python module folder.
