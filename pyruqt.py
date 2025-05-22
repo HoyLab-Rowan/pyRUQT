@@ -141,13 +141,13 @@ class sie_negf:
     s2=None
 
   elif inp['elec_prog']=="supercell":
-  l_elec=0
-  r_elec=0
+   l_elec=0
+   r_elec=0
    if inp['exmol_prog']=="molcas":
     if inp['molcas_supercell']==True:
      size_ex,elec_orb=read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
     else:
-     geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=basis_set,ecp=ecp) 
+     geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp']) 
      ao_data=gto.mole.ao_labels(geo2,fmt=False)
      atom_num=0
      ao_index=0
@@ -159,7 +159,7 @@ class sie_negf:
       if ao_index == ao_data_len:
        print("The # of electrode atoms is incorrect")
        break
-     elec_orb=ao_index-1
+     elec_orb=int(ao_index)-1
 
     l_elec=elec_orb
     r_elec=elec_orb
