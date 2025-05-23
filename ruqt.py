@@ -1003,7 +1003,6 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
   numocc=math.ceil(numelec/2)
   numvirt=norb-numocc
   size_ex=norb-2*size_elec
-
 #This part writes the options to the input file for the RUQT Fortran code
  negf_inp = open("fort_ruqt",'w')
  negf_inp.write("{0}".format(Calc_Type) +  "\n")
