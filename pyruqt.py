@@ -406,7 +406,7 @@ class wbl_negf:
    if inp['molcas_supercell']==True:
     elec_orb=0
    else:
-    geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=basis_set,ecp=ecp)
+    geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp'])
     ao_data=gto.mole.ao_labels(geo2,fmt=False)
     atom_num=0
     ao_index=0

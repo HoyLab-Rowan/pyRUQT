@@ -1,6 +1,6 @@
 import numpy as np
 import scipy
-from pyscf import gto,dft,scf,mcpdft,lo
+from pyscf import gto,dft,scf,mcpdft,lo,tools
 from ase import transport,Atoms,units
 import matplotlib.pyplot as plt
 import string,subprocess
@@ -316,7 +316,7 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter,pyscf_setting
  numelec=int(np.sum(pyscf_elec.mo_occ))
  #These routines print the data to a MolEl.dat file for use in reruns 
  nTotEl = geo.nelec[0]+ geo.nelec[1]
- if pyscf_settings[0]=="mcpdft":
+ if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
   nAO = mc.mo_coeff.shape[1]
   mo_coef = mc.mo_coeff
  else:
@@ -656,7 +656,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4]).newton()
     pyscf_elec.xc=dft_functional
 
-   pyscf_elec.init_guess = pyscf_settings[3]
+   pyscf_elec.init_guess = pyscf_conv_settings[6]
    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
    pyscf_elec.damp=pyscf_conv_settings[3]
    pyscf_elec.kernel()
@@ -738,7 +738,7 @@ def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
  norb=len(h)
  numelec=int(np.sum(pyscf_elec.mo_occ))
  nTotEl = geo.nelec[0]+ geo.nelec[1]
- if pyscf_settings[0]=="mcpdft":
+ if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
   nAO = mc.mo_coeff.shape[1]
   mo_coef = mc.mo_coeff
  else:
@@ -1027,9 +1027,9 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
  negf_inp.write("{0}".format(max_bias) + "\n")
  negf_inp.write("{0}".format(delta_bias) + "\n")
  negf_inp.write("{0}".format(KT) + "\n")
- negf_inp.write("{0}".format(exmol_prog) + "\n")
+ negf_inp.write("{0}".format("molcas") + "\n")
  negf_inp.write("{0}".format(rdm_doubles) + "\n")
- negf_inp.write("{0}".format(qc_method) + "\n")
+ negf_inp.write("{0}".format("dft") + "\n")
  negf_inp.write("{0}".format(use_b0) + "\n")
  negf_inp.write("{0}".format(b0_type) + "\n")
  negf_inp.write("{0}".format("F") + "\n")
