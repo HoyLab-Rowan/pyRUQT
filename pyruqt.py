@@ -12,7 +12,7 @@ class sie_negf:
   self.input_parameters = {'output'    : "pyruqt_results",
                           'exmol_prog' : "pyscf",
                           'exmol_dir'  : "./",
-                          'elec_prog'  : "pyscf",
+                          'elec_prog'  : "supercell",
                           'elec_dir'   : None,
                           'elec2_dir'  : None,
                           'run_molcas'  : False,
@@ -31,7 +31,7 @@ class sie_negf:
                           'elec_geo'   : None,
                           'elec2_geo'  : None,
                           'state_num'  : 1, 
-                          'state_num_e' : 1,
+                          'trans_state' : 1,
                           'coupling_calc' : "none",
                           'coupled'       : "molecule",
                           'spin_pol'      : False,
@@ -62,7 +62,7 @@ class sie_negf:
                           'read_mc_mo'    : False,
                           'molel_read_dir' : "",
                           'diis_start_cycle' : 1,
-                          'scf_algo'      : "adiis",
+                          'scf_algo'      : "cdiis",
                           'damping'       : 0,
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
@@ -83,7 +83,7 @@ class sie_negf:
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state']]
   pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
  
   print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
@@ -98,7 +98,7 @@ class sie_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4]+" in "+inp['basis_set']+" basis set",file=outputfile)
+   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4],file=outputfile)
    if pyscf_settings[0]=="mcpdft":
     print("Using Pyscf for an MC-PDFT calculation",file=outputfile)
   if inp['elec_prog']=="molcas":
@@ -338,6 +338,7 @@ class wbl_negf:
                           'ecp'        : None,
                           'exmol_geo'  : None,
                           'state_num'  : 1,
+                          'trans_state' :1,
                           'FermiE'     :-5.30,
                           'FermiD'     : 0.07,
                           'qc_method'  : "dft",
@@ -384,7 +385,7 @@ class wbl_negf:
   sys.stderr=open(inp['output']+".err",'w')
   
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state']]
   pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
 
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
@@ -399,7 +400,7 @@ class wbl_negf:
    print("Using Molcas calculation at "+inp['exmol_dir']+" for extended molecular region",file=outputfile)
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
-   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4]+" in "+inp['basis_set']+" basis set",file=outputfile)
+   print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4],file=outputfile)
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -553,7 +554,7 @@ class es_calc:
                           'molel_read_dir' : "",
                           'scf_attempts'  : 1,
                           'diis_start_cycle' : 1,
-                          'scf_algo'      : "adiis",
+                          'scf_algo'      : "cdiis",
                           'damping'       : 0,
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
@@ -573,7 +574,7 @@ class es_calc:
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],0]
   pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
 
   print("Performing Standalone PySCF or MOLCAS calculation.",file=outputfile)
@@ -597,4 +598,4 @@ class es_calc:
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],0,pyscf_settings,pyscf_conv_settings)
 
-  print("Single Point Calculation Complete. Check the .log and .err files for output data/errors.")
+  print("Single Point Calculation Complete. Check the .log and .err files for output data/errors.",file=outputfile)

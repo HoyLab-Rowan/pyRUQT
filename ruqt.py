@@ -504,7 +504,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     elif pyscf_conv_settings[5]=="ediis":
      pyscf_elec.DIIS=scf.EDIIS
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
@@ -528,7 +528,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.output=pyscf_settings[9]+".log"
     pyscf_elec.damp=pyscf_conv_settings[3]
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
 #    pyscf_elec.newton()
     pyscf_elec.kernel()
 
@@ -551,7 +551,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    if "diis" in pyscf_conv_settings[5]:
     pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
     pyscf_elec.xc=dft_functional
-    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
     pyscf_elec.output=pyscf_settings[9]+".log"
     pyscf_elec.damp=pyscf_conv_settings[3]
@@ -561,7 +561,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     elif pyscf_conv_settings[5]=="ediis":
      pyscf_elec.DIIS=scf.EDIIS
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
@@ -580,12 +580,12 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
      #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
     pyscf_elec.xc=dft_functional
     pyscf_elec=pyscf_elec.newton()
-    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
     pyscf_elec.output=pyscf_settings[9]+".log"
     pyscf_elec.damp=pyscf_conv_settings[3]
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
 #    pyscf_elec.newton()
     pyscf_elec.kernel()
 
@@ -611,7 +611,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     elif pyscf_conv_settings[5]=="ediis":
      pyscf_elec.DIIS=scf.EDIIS
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
@@ -628,12 +628,12 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
      #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
     pyscf_elec.xc=dft_functional
     pyscf_elec=pyscf_elec.newton()
-    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
     pyscf_elec.output=pyscf_settings[9]+".log"
     pyscf_elec.damp=pyscf_conv_settings[3]
     if pyscf_conv_settings[9]==True:
-     pyscf_elec=pyscf.addons.frac_occ(pyscf_elec)
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
 #    pyscf_elec.newton()
     pyscf_elec.kernel()
 
@@ -656,7 +656,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4]).newton()
     pyscf_elec.xc=dft_functional
 
-   pyscf_elec.init_guess = pyscf_conv_settings[6]
+   pyscf_elec.init_guess=pyscf_conv_settings[6]
    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
    pyscf_elec.damp=pyscf_conv_settings[3]
    pyscf_elec.kernel()
@@ -686,6 +686,8 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   elif pyscf_settings[1]=="casci":
    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+   if pyscf_settings[11] != 1:
+    mc.fcisolver.nroots = pyscf_settings[11]
    if pyscf_settings[6] != []:
     mo=mc.sort(active_orb)
     mc.kernel(mo)
@@ -702,7 +704,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
     tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
    else:
-    tools.molden.from_scf(pyscf_elec,"scf_orbital.molden")
+    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scforb.molden")
    # tools.cubegen.orbital(geo,"scf_orbitals.cube",pyscf_elec.mo_coeff,resolution=0.02,margin=6.0)
   #The remainder of this file builds the PDFT fock matrix in an ao basis
   #The next two lines build the wave function-like parts of the fock matrix.
@@ -716,6 +718,14 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   s = pyscf_elec.get_ovlp()
 
   h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo)
+
+ if pyscf_settings[8]==True:
+  if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
+    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scf.molden")
+    tools.molden.from_mcscf(mc, pyscf_settings[9]+"_mc.molden", ignore_h=True, cas_natorb=False)
+   # tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
+  else:
+    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scf.molden")
 
  ao_data=gto.mole.ao_labels(geo,fmt=False)
 

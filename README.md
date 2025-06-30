@@ -1,5 +1,6 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
+(6/29/2025): Added support for excited state calculations using MC-PDFT.
 
 (5/21/2025): Updated PySCF calculator to allow for far more SCF/MC-PDFT calculation options to be set (particularly SCF and active space optimization options) and added support for restarts and orbital visualization (creates a molden file). Modified all supercell calculations to use the "num_elec_atoms" keyword to set the number of atoms in the electrode (the program now calculates the # of orbitals based on your chosen exmol_prog). Added new es_calc module for running separate electronic structure calculations with PySCF (MOLCAS not supported) which generates both chk files and MolEl.dat files for restarts and separate transport calculations respectively.
 
