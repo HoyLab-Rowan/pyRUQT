@@ -263,18 +263,19 @@ class sie_negf:
   # plt.clf()
 
 
-  return T,calc
+  return T,calc,energies,bias,outputfile
 
  def current(self):
-  energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
+  #energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
   inp=self.input_parameters
+
+  T,calc,energies,bias,outputfile=sie_negf.transmission(self)
   print("Performing a Landauer current calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
   print("Final current values will be printed to "+inp['output']+".iv"+" in volts vs ampheres",file=outputfile)
   print("Final conductance values will be printed to "+inp['output']+".con"+" in volts vs G_0",file=outputfile)
 
-  T,calc=sie_negf.transmission(self)
   if inp['ase_current']==True:
    I = calc.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'])
   else:
@@ -299,8 +300,9 @@ class sie_negf:
   np.savetxt(inp['output']+".con",np.c_[bias,cond],fmt="%s")
 
  def diff_conductance(self):
-  energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
+  #energies,bias,outputfile,h,h1,h2,s,s1,s2,hc1,sc1,hc2,sc2=sie_negf.calc_setup(self)
   inp=self.input_parameters
+  T,calc,energies,bias,outputfile=sie_negf.transmission(self)
   print("Calculating differential conductance using numerical derivatives",file=outputfile)
   print("Calculting each value using the +/-"+str(inp['fd_change'])+" voltage points around it.",file=outputfile)
   print("Performing the diff. conductance calculation for the following bias voltage range(V): "+str(bias),file=outputfile)
@@ -308,7 +310,7 @@ class sie_negf:
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
   print("Final diff. conductance values will be printed to "+inp['output']+".dcon"+" in volts vs G_0",file=outputfile)
  
-  T,calc=sie_negf.transmission(self)
+  #T,calc=sie_negf.transmission(self)
 
   DE=ruqt.get_diffcond(calc,bias,inp['temp'],energies,T,inp['fd_change'],inp['ase_current'],inp['delta_energy'])
 
