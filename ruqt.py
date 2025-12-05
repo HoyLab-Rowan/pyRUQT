@@ -322,8 +322,9 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter,pyscf_setting
  else:
   nAO= pyscf_elec.mo_coeff.shape[1]
   mo_coef=pyscf_elec.mo_coeff
-  nAct=0
-  nActEl=0
+  if pyscf_settings[0]!="mcpdft":
+   nAct=0
+   nActEl=0
 
  print_molel(h,s,norb,numelec,nTotEl,nAct,nActEl,nAO,mo_coef)
  h=h*27.211396641308
@@ -483,7 +484,8 @@ def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_
 def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_settings,pyscf_conv_settings):
  #from pyscf import gto,dft,scf
 
- geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5],output=pyscf_settings[9]+".log")
+ outputfile=open(pyscf_settings[9]+".out",'w')
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5],output=pyscf_settings[9]+".log",spin=pyscf_conv_settings[11],charge=pyscf_conv_settings[10])
  h_final=0
  s_final=0
  norb=0
@@ -492,7 +494,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
  if pyscf_settings[0]=="dft":
   if pyscf_settings[3]=="rks":
    if "diis" in pyscf_conv_settings[5]:
-    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
     pyscf_elec.xc=dft_functional
     pyscf_elec.init_guess = pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
@@ -508,7 +520,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
-     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
      exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
@@ -519,7 +531,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=2*pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
      #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
     pyscf_elec.xc=dft_functional
     pyscf_elec=pyscf_elec.newton()
@@ -533,14 +555,14 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
-     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
      exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
     s = pyscf_elec.get_ovlp()
     h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
   else:
-   print("DFT spin choice not supported")
+   print("DFT/SCF choice not supported",file=pyscf_settings[9]+".out")
    exit()
    #norb=len(h)
    #numelec=int(np.sum(pyscf_elec.mo_occ))
@@ -549,7 +571,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   [nActEl,nAct]=pyscf_settings[2]
   if pyscf_settings[3]=="rks":
    if "diis" in pyscf_conv_settings[5]:
-    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
     pyscf_elec.xc=dft_functional
     pyscf_elec.init_guess=pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
@@ -565,7 +597,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
-     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
      exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
@@ -576,7 +608,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
      #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
     pyscf_elec.xc=dft_functional
     pyscf_elec=pyscf_elec.newton()
@@ -590,7 +632,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
    if pyscf_elec.converged==False:
-    print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+    print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
     exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
@@ -600,7 +642,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   elif pyscf_settings[3]=="rhf":
    if "diis" in pyscf_conv_settings[5]:
-    pyscf_elec=scf.RHS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
     pyscf_elec.init_guess = pyscf_conv_settings[6]
     pyscf_elec.chkfile=pyscf_settings[9]+".chk"
     pyscf_elec.output=pyscf_settings[9]+".log"
@@ -615,7 +667,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
-     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
      exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
@@ -624,7 +676,17 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
      #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
     pyscf_elec.xc=dft_functional
     pyscf_elec=pyscf_elec.newton()
@@ -638,7 +700,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.kernel()
 
     if pyscf_elec.converged==False:
-     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.")
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
      exit()
     h = pyscf_elec.get_fock()
 #    h=h*27.2114
@@ -648,26 +710,48 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   elif pyscf_settings[3]=="chkfile":
    if pyscf_conv_settings[5].lower()=="diis" or pyscf_conv_settings[5]==None:
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
     pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
     pyscf_elec.xc=dft_functional
     pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
 
    elif pyscf_conv_settings[5].lower=="soscf":
-    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4]).newton()
+    match pyscf_settings[12]:
+     case "no_df":
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case "df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+     case _:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec=pyscf_elec.newton()
     pyscf_elec.xc=dft_functional
-
+   
    pyscf_elec.init_guess=pyscf_conv_settings[6]
    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
    pyscf_elec.damp=pyscf_conv_settings[3]
    pyscf_elec.kernel()
 
   else:
-   print("SCF method not recognized. Use rks or rhf keywords.")
+   print("SCF method not recognized. Use rks or rhf keywords.",file=outputfile)
    exit()
 
   if pyscf_conv_settings[7]==True:
    mo_old=read_molel_orbs(shape(pyscf_elec.mo_coeff[1]),pyscf_conv_setting[8])
-   pyscfi_elec.mo_coeff=mo_old
+   pyscf_elec.mo_coeff=mo_old
 
   #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
   #print("Using t"+pyscf_settings[4]+" for MCPDFT functional")
@@ -695,7 +779,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc.kernel()
 
   else:
-   print("MCSCF method not recognized. Use casscf or casci keywords.")
+   print("MCSCF method not recognized. Use casscf or casci keywords.",file=outputfile)
    exit()
   mc.analyze()
 
@@ -737,7 +821,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   atom_num=ao_data[ao_index][0]
   ao_index+=1
   if ao_index == ao_data_len:
-   print("The # of electrode atoms is incorrect")
+   print("The # of electrode atoms is incorrect",file=outputfile)
    break
  elec_orb=ao_index-1
 
@@ -748,9 +832,10 @@ def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
  norb=len(h)
  numelec=int(np.sum(pyscf_elec.mo_occ))
  nTotEl = geo.nelec[0]+ geo.nelec[1]
- if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
+ if mc != "None":
   nAO = mc.mo_coeff.shape[1]
   mo_coef = mc.mo_coeff
+  nAct,nActEl= mc.ncas, mc.nelecas
  else:
   nAO= pyscf_elec.mo_coeff.shape[1]
   mo_coef=pyscf_elec.mo_coeff
@@ -790,6 +875,7 @@ def read_molel_orbs(nAO,molel_read_dir):
  f = open(molel_read_dir+"/MolEl.dat", "r")
 
  content=f.readlines()
+ mo_coeff=np.zeros((nAO,nAO),dtype=float)
  for row in f:
   word="Molecular orbital coefficients"
   if row.find(word) !=-1:
@@ -1002,7 +1088,7 @@ def fort_inputwrite(cal_typ,FermiE,Fermi_Den,temp,max_bias,min_bias,delta_bias,m
    cpdata_1=subprocess.Popen(cp_fock,shell=True)
    cpdata_1.wait()
    #h,s,norb,numelec,actorb,actelec,states=esc_molcas2(exmol_dir,"MolEl.dat",state_num,outputfile) 
-   size_ex,size_elec=read_syminfo(exmol_dir,norb,num_elec_atoms,outputfile)  
+   size_ex,size_elec=ruqt.read_syminfo(exmol_dir,norb,num_elec_atoms,outputfile)  
   else:
    size_ex=norb-2*size_elec
   numocc=int(numelec/2)

@@ -67,7 +67,9 @@ class sie_negf:
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
-                          'molcas_supercell'      : False}
+                          'molcas_supercell'      : False,
+                          'charge'        : 0,
+                          'spin'          : 0}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -83,8 +85,8 @@ class sie_negf:
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state']]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state'],inp['aux_basis']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
  
   print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
   print("Using Atomic Simulation Environment to calculate electrode interactions and transport",file=outputfile)
@@ -145,7 +147,7 @@ class sie_negf:
    r_elec=0
    if inp['exmol_prog']=="molcas":
     if inp['molcas_supercell']==True:
-     size_ex,elec_orb=read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
+     size_ex,elec_orb=ruqt.read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
     else:
      geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp']) 
      ao_data=gto.mole.ao_labels(geo2,fmt=False)
@@ -370,7 +372,9 @@ class wbl_negf:
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
-                          'molcas_supercell'      : False}
+                          'molcas_supercell'      : False,
+                          'charge'        : 0,
+                          'spin'          : 0}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -387,8 +391,8 @@ class wbl_negf:
   sys.stderr=open(inp['output']+".err",'w')
   
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state']]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state'],inp['aux_basis']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
 
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
   print("Using RUQT-Fortran to calculate transport",file=outputfile)
@@ -560,7 +564,9 @@ class es_calc:
                           'damping'       : 0,
                           'level_shift'   : 0,
                           'scf_guess'     : 'minao',
-                          'frac_occ'      : 'false'}
+                          'frac_occ'      : 'false',
+                          'charge'        : 0,
+                          'spin'          : 0}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -576,8 +582,8 @@ class es_calc:
   outputfile=open(inp['output']+".out",'w')
   sys.stderr=open(inp['output']+".err",'w')
 
-  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],0]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ']]
+  pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],0,inp['aux_basis']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
 
   print("Performing Standalone PySCF or MOLCAS calculation.",file=outputfile)
   print("Running Calculation using the following paramaters:",file=outputfile)
