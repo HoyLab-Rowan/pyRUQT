@@ -1,4 +1,5 @@
 List of all updates to pyRUQT
+
 (12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.
 
 (6/29/2025): Added support for excited state calculations using MC-PDFT.
