@@ -48,7 +48,7 @@ class sie_negf:
                           'verbosity'     : 5,
                           'cell_dim'      : 1,
                           'pbc_spin'      : None,
-                          'aux_basis'     : None,
+                          'aux_basis'     : "df_default",
                           'pdos_states'   : [],
                           'eigenchannels' : 0,
                           'es_method'  : "mcpdft",
@@ -373,6 +373,7 @@ class wbl_negf:
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
                           'molcas_supercell'      : False,
+                          'aux_basis'     : "df_default"
                           'charge'        : 0,
                           'spin'          : 0}
   self.param_update(**kwargs)
@@ -545,7 +546,7 @@ class es_calc:
                           'verbosity'     : 5,
                           'cell_dim'      : 1,
                           'pbc_spin'      : None,
-                          'aux_basis'     : None,
+                          'aux_basis'     : "df_default",
                           'pdos_states'   : [],
                           'eigenchannels' : 0,
                           'es_method'  : "mcpdft",
