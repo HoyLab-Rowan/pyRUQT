@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
-from pyscf import gto,dft,scf,mcpdft,lo,tools
+from pyscf import gto,dft,scf,mcscf,mcpdft,lo,tools
+from pyscf.mcscf import avas
 from ase import transport,Atoms,units
 import matplotlib.pyplot as plt
 import string,subprocess
@@ -757,25 +758,52 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   #print("Using t"+pyscf_settings[4]+" for MCPDFT functional")
   if pyscf_settings[1]=="casscf":
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
+    mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
+    mo=mc2.sort_mo(pyscf_settings[6])
+    mc2.kernel(mo)
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
-    mo=mc.sort(pyscf_settings[6])
-    mc.kernel(mo)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
    elif pyscf_settings[7]==True and pyscf_settings[6] != []:
     nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
+    mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
+    mc2.kernel(orbs)
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
-    mc.kernel(orbs)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
    else:
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel()
 
   elif pyscf_settings[1]=="casci":
-   mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
-   if pyscf_settings[11] != 1:
-    mc.fcisolver.nroots = pyscf_settings[11]
-   if pyscf_settings[6] != []:
-    mo=mc.sort(active_orb)
-    mc.kernel(mo)
+   if pyscf_settings[6] != [] and pyscf_settings[7]==False:
+    mc2 = mcscf.CASCI(pyscf_elec, nAct, nActEl)
+    mo=mc2.sort_mo(pyscf_settings[6])
+    mc2.kernel(mo)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
+   if pyscf_settings[7]==True and pyscf_settings[6] != []:
+    nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
+    mc2 = mcscf.CASCI(pyscf_elec, nAct, nActEl)
+    mc2.kernel(orbs)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
    else:
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel()
 
   else:
