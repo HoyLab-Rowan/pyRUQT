@@ -495,14 +495,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
  if pyscf_settings[0]=="dft":
   if pyscf_settings[3]=="rks":
    if "diis" in pyscf_conv_settings[5]:
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -532,14 +531,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -572,14 +570,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   [nActEl,nAct]=pyscf_settings[2]
   if pyscf_settings[3]=="rks":
    if "diis" in pyscf_conv_settings[5]:
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -609,14 +606,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -643,14 +639,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   elif pyscf_settings[3]=="rhf":
    if "diis" in pyscf_conv_settings[5]:
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -677,14 +672,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    elif "soscf" in pyscf_conv_settings[5]:
     #print("Using SOSCF")
     #for i in range(1,pyscf_conv_settings[5]):
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -711,14 +705,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   elif pyscf_settings[3]=="chkfile":
    if pyscf_conv_settings[5].lower()=="diis" or pyscf_conv_settings[5]==None:
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
@@ -727,14 +720,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
 
    elif pyscf_conv_settings[5].lower=="soscf":
-    match pyscf_settings[12]:
-     case "no_df":
+    if pyscf_settings[12]=="no_df":
       print("Not using density fitting.",file=outputfile)
       pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case "df_default":
+    elif pyscf_settings[12]=="df_default":
       print("Using default density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
-     case _:
+    else:
       print("Using given density fitting auxiliary basis.",file=outputfile)
       pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
       pyscf_elec.with_df.auxbasis=pyscf_settings[8]
