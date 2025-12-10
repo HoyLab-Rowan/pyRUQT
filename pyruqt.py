@@ -373,7 +373,7 @@ class wbl_negf:
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
                           'molcas_supercell'      : False,
-                          'aux_basis'     : "df_default"
+                          'aux_basis'     : "df_default",
                           'charge'        : 0,
                           'spin'          : 0}
   self.param_update(**kwargs)
