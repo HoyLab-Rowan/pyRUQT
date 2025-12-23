@@ -818,12 +818,12 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    exit()
   mc.analyze()
 
-  #Print out orbitals
-  if pyscf_settings[8]==True:
-   if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
-    tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
-   else:
-    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scforb.molden")
+  #Print out orbitals(old)
+  #if pyscf_settings[8]==True:
+  # if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
+  #  tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
+  # else:
+  #  tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scforb.molden")
    # tools.cubegen.orbital(geo,"scf_orbitals.cube",pyscf_elec.mo_coeff,resolution=0.02,margin=6.0)
   #The remainder of this file builds the PDFT fock matrix in an ao basis
   #The next two lines build the wave function-like parts of the fock matrix.
