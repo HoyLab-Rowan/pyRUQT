@@ -199,29 +199,44 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,convtol,maxiter,lattice_v,meshnum,verbosity,cell_dim,pbc_spin,aux_basis,pyscf_settings):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,verbosity,cell_dim,pyscf_settings,pyscf_conv_settings):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
  from pyscf.pbc import df as pdf
 
- if meshnum != None:
-  mesh_vec=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)]
+ if pyscf_settings[0]=="dft":
+  outputfile=open(pyscf_settings[9]+".log",'w')
+  if meshnum != None:
+   mesh_vec=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)]
+  else:
+   mesh_vec=None
+  cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=pyscf_settings[5],dimension=cell_dim,spin=pyscf_conv_settings[11])
+ 
+  #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
+  pbc_elec=pbcdft.KRKS(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
+  #print(pbc_elec.kpts)
+
+  if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+   print("Not using density fitting.",file=outputfile)
+  elif pyscf_settings[12]=="df_default":
+   print("Using default density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis="weigand"
+   pbc_elec.with_df=pdf.GDF(cell)
+  else:
+   print("Using given density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis=pyscf_settings[8]
+   pbc_elec.with_df=pdf.GDF(cell)
+
+  pbc_elec.chkfile=pyscf_settings[9]+".chk"
+  pbc_elec.output=pyscf_settings[9]+".log"
+  pbc_elec.ecp=ecp
+  #pbc_elec.with_df._cderi_to_save='test_save'
+  pbc_elec.xc=dft_functional
+  pbc_elec.incore_anyway=True
+  pbc_elec.kernel()
  else:
-  mesh_vec=None
- cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=verbosity,dimension=cell_dim,spin=pbc_spin)
-
- #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
- pbc_elec=pbcdft.RKS(cell).set(max_cycle=maxiter,conv_tol=convtol,exp_to_discard=0.1)
- #print(pbc_elec.kpts)
- pbc_elec.with_df=pdf.GDF(cell)
- pbc_elec.with_df.auxbasis=aux_basis
- #pbc_elec.ecp=ecp
- #pbc_elec.with_df._cderi_to_save='test_save'
- pbc_elec.xc=dft_functional
- #pbc_elec.incore_anyway=True
- pbc_elec.kernel()
-
+  print("Only PBC-DFT is currently supported. Please use es_method=\"dft\".",file=outputfile)
  h_scf=pbc_elec.get_fock()
  h_scf=h_scf*27.2114
  s=pbc_elec.get_ovlp()
