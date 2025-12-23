@@ -1,15 +1,15 @@
 # pyRUQT
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
+Most recent changes:
+
+(12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our youtube channel for tutorials on how to use pyRUQT: https://www.youtube.com/@hoyresearchgroup
+
 (12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.
 
 (6/29/2025): Added support for excited state calculations using MC-PDFT.
 
 (5/21/2025): Updated PySCF calculator to allow for far more SCF/MC-PDFT calculation options to be set (particularly SCF and active space optimization options) and added support for restarts and orbital visualization (creates a molden file). Modified all supercell calculations to use the "num_elec_atoms" keyword to set the number of atoms in the electrode (the program now calculates the # of orbitals based on your chosen exmol_prog). Added new es_calc module for running separate electronic structure calculations with PySCF (MOLCAS not supported) which generates both chk files and MolEl.dat files for restarts and separate transport calculations respectively.
-
-(4/28/2025): New prototype self-consistent NEGF code based on PySCF added in the new SC_NEGF folder. Once debugging is complete it will be merged with main codebase. Feedback is appreciated!
-
-(4/7/2025): Added ability to run MC-PDFT calculations using PySCF. Created new pyscf_settings keyword (see the pyscf_mcpdft_example.py script in examples folder for details on how to use). Currently requires installing pyscf-forge in addition to PySCF: https://github.com/pyscf/pyscf-forge
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
@@ -38,26 +38,27 @@ New features:
   2.  Full alignment of diagonal elements of electrode/extended molecule Hamiltonians for ASE calculations
   3.  Options to include additional electrode-molecule coupling for ASE NEGF caculations
   4.  Automatic plotting of transport results in PNG format
+  5.  Non-transport calculations using PySCF through es_calc class. Useful for optimizing the junction's electronic structure before running transport calculations (and you can use the chkfile/mo files from es_calc as guess files for   sie_negf/wbl_negf calcualtions)
 
 Required:
 
-Python3 (pref 3.9+), Numpy, Scipy, and Matplotlib
+Python3 (pref 3.9+), Numpy, Scipy, and Maes_calctplotlib
 
 MKL (RUQT-Fortran)
 
-
-NEGF Transport Calculator Options. Only 1 of the following are required but both are recommended to enable both NEGF calculators.
+NEGF and ES Calculator Options and Required Supporting Libraries. Only 1 of the following is required but all three are recommended.
 
     For sie_negf class: Atomic Simulation Environment from https://wiki.fysik.dtu.dk/ase/
 
     For wbl_negf class: Compiled RUQT executable. Compile the RUQT.x executable in the RUQT subdirectory.
 
+    For es_calc class: PySCF from https://pyscf.org/
+       
 Electronic Structure Calculator Options. Only 1 of the following are required but both recommended:
 
     OpenMolcas(sandx_fock branch) installation (best run as separate calculations but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
 
-    PySCF (enables non-Molcas NEGF-DFT calculations and mixed DFT/PDFT transport calculations by pyRUQT) from https://pyscf.org/
-	*To use PySCF-based MC-PDFT, pyscf_forge must also be installed: https://github.com/pyscf/pyscf-forge
+    PySCF (enables non-Molcas NEGF-DFT/MC-PDFT transport calculations by pyRUQT) from https://pyscf.org/
        
 Quick Installation (for now, Python package install coming in future)
 
@@ -65,7 +66,7 @@ Quick Installation (for now, Python package install coming in future)
 
     Install ASE, OpenMolcas(sandx_fock branch), and optionally PySCF for all users.
 
-    Check the examples folder for scripts to get started running calculations.
+    Use the run_pyRUQT.py script in the examples to get started running calculations. Check out https://www.youtube.com/@hoyresearchgroup for tutorial videos
 
 If you use this code in your research please cite:
 
