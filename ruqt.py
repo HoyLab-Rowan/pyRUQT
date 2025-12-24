@@ -199,7 +199,7 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_dim,pyscf_settings,pyscf_conv_settings):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_dim,kpts,pyscf_settings,pyscf_conv_settings):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
@@ -214,7 +214,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
   cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=pyscf_settings[5],dimension=cell_dim,spin=pyscf_conv_settings[11])
 
   if kpts!=None:
-   kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
+   cell.make_kpts(kpts)
   pbc_elec=pbcdft.KRKS(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
   #print(pbc_elec.kpts)
 
@@ -255,6 +255,8 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
   pbc_elec.kernel()
 
  elif pyscf_settings[0]=="rhf":
+  if kpts!=None:
+   cell.make_kpts(kpts)
   pbc_elec=pbcscf.KRHF(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
 
   if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:

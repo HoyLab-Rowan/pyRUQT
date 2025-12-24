@@ -72,7 +72,8 @@ class sie_negf:
                           'spin'          : 0,
                           'smearing' : None,
                           'smearing_width' : 0.05,
-                          'remove_linear_dep' : True}
+                          'remove_linear_dep' : True,
+                          'kpoints'       : [1,1,1]}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -119,7 +120,7 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
@@ -133,12 +134,12 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
     h1,s1,norb_le,numelec_le,elec_orb_le=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
     else:
      h2,s2,norb_re,numelec_re,elec_orb_re=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    else:
@@ -389,7 +390,8 @@ class wbl_negf:
                           'spin'          : 0,
                           'smearing' : None,
                           'smearing_width' : 0.05,
-                          'remove_linear_dep' : True}
+                          'remove_linear_dep' : True,
+                          'kpoints'      : [1,1,1]}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -445,7 +447,7 @@ class wbl_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
@@ -587,7 +589,8 @@ class es_calc:
                           'spin'          : 0,
                           'smearing' : None,
                           'smearing_width' : 0.05,
-                          'remove_linear_dep' : True}
+                          'remove_linear_dep' : True,
+                          'kpoints'      : [1,1,1]}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -623,7 +626,7 @@ class es_calc:
    #h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['es_prog'],"MolEl.dat",inp['state_num'],outputfile)
   elif inp['es_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],0,pyscf_settings,pyscf_conv_settings)
 
