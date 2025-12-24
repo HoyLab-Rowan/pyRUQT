@@ -46,7 +46,7 @@ class sie_negf:
                           'lattice_v'     : None,
                           'meshnum'       : None,
                           'verbosity'     : 5,
-                          'cell_dim'      : 1,
+                          'cell_dim'      : 2,
                           'pbc_spin'      : None,
                           'aux_basis'     : "df_default",
                           'pdos_states'   : [],
@@ -69,7 +69,10 @@ class sie_negf:
                           'frac_occ'      : 'false',
                           'molcas_supercell'      : False,
                           'charge'        : 0,
-                          'spin'          : 0}
+                          'spin'          : 0,
+                          'smearing' : None,
+                          'smearing_width' : 0.05,
+                          'remove_linear_dep' : True}
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -86,7 +89,7 @@ class sie_negf:
   sys.stderr=open(inp['output']+".err",'w')
 
   pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state'],inp['aux_basis']]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin'],inp['smearing'],inp['smearing_width'],inp['remove_linear_dep']]
  
   print("Performing non-self-consistent NEGF transport calculations using semi-infinite tight-binding electrodes",file=outputfile)
   print("Using Atomic Simulation Environment to calculate electrode interactions and transport",file=outputfile)
@@ -116,7 +119,7 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
@@ -130,12 +133,12 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
+    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
    else:
     h1,s1,norb_le,numelec_le,elec_orb_le=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
+     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
     else:
      h2,s2,norb_re,numelec_re,elec_orb_re=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    else:
@@ -353,6 +356,14 @@ class wbl_negf:
                           'ase_current' : False,
                           'conv_tol'      : 1E-7,
                           'max_iter'      : 200,
+                          'pyscf_pbc'     : False,
+                          'lattice_v'     : None,
+                          'meshnum'       : None,
+                          'cell_dim'      : 2,
+                          'pbc_spin'      : None,
+                          'aux_basis'     : "df_default",
+                          'pdos_states'   : [],
+                          'eigenchannels' : 0,
                           'verbosity'     : 5,
                           'es_method'  : "mcpdft",
                           'dft_functional' : "pbe",
@@ -375,7 +386,10 @@ class wbl_negf:
                           'molcas_supercell'      : False,
                           'aux_basis'     : "df_default",
                           'charge'        : 0,
-                          'spin'          : 0}
+                          'spin'          : 0,
+                          'smearing' : None,
+                          'smearing_width' : 0.05,
+                          'remove_linear_dep' : True}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -393,7 +407,7 @@ class wbl_negf:
   
 
   pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],inp['trans_state'],inp['aux_basis']]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin'],inp['smearing'],inp['smearing_width'],inp['remove_linear_dep']]
 
   print("Performing non-self-consistent NEGF calculations using metal wide band limit approximation for electrodes",file=outputfile)
   print("Using RUQT-Fortran to calculate transport",file=outputfile)
@@ -430,7 +444,10 @@ class wbl_negf:
 
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
-   h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
+   if inp['pyscf_pbc']==True:
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
+   else:
+    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
   return(energies,bias,outputfile,h,s,norb,numelec,elec_orb)
 
@@ -544,7 +561,7 @@ class es_calc:
                           'lattice_v'     : None,
                           'meshnum'       : None,
                           'verbosity'     : 5,
-                          'cell_dim'      : 1,
+                          'cell_dim'      : 2,
                           'pbc_spin'      : None,
                           'aux_basis'     : "df_default",
                           'pdos_states'   : [],
@@ -567,7 +584,10 @@ class es_calc:
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
                           'charge'        : 0,
-                          'spin'          : 0}
+                          'spin'          : 0,
+                          'smearing' : None,
+                          'smearing_width' : 0.05,
+                          'remove_linear_dep' : True}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -584,7 +604,7 @@ class es_calc:
   sys.stderr=open(inp['output']+".err",'w')
 
   pyscf_settings=[inp['es_method'],inp['mcscf_type'],inp['active_space'],inp['scf_solver'],inp['dft_functional'],inp['verbosity'],inp['active_orb'],inp['auto_as'],inp['display_orbitals'],inp['output'],inp['state_num'],0,inp['aux_basis']]
-  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin']]
+  pyscf_conv_settings=[inp['max_iter'],inp['conv_tol'],inp['diis_start_cycle'],inp['damping'],inp['level_shift'],inp['scf_algo'],inp['scf_guess'],inp['read_mc_mo'],inp['molel_read_dir'],inp['frac_occ'],inp['charge'],inp['spin'],inp['smearing'],inp['smearing_width'],inp['remove_linear_dep']]
 
   print("Performing Standalone PySCF or MOLCAS calculation.",file=outputfile)
   print("Running Calculation using the following paramaters:",file=outputfile)
@@ -603,7 +623,7 @@ class es_calc:
    #h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['es_prog'],"MolEl.dat",inp['state_num'],outputfile)
   elif inp['es_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['conv_tol'],inp['max_iter'],inp['lattice_v'],inp['meshnum'],inp['verbosity'],inp['cell_dim'],inp['pbc_spin'],inp['aux_basis'],pyscf_settings)
+    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['es_dir']+inp['es_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],0,pyscf_settings,pyscf_conv_settings)
 

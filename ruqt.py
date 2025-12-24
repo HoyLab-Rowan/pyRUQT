@@ -199,7 +199,7 @@ def esc_molcas2(data_dir,data_file,state_num,outputfile):
  return h,s,norb,numelec,actorb,actelec,states
 
 #calculates electric structure info (Hamiltonian, Overlap) with PySCF
-def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,verbosity,cell_dim,pyscf_settings,pyscf_conv_settings):
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_dim,pyscf_settings,pyscf_conv_settings):
  from pyscf.pbc import gto as pbcgto
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
@@ -212,8 +212,9 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,verbosi
   else:
    mesh_vec=None
   cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=pyscf_settings[5],dimension=cell_dim,spin=pyscf_conv_settings[11])
- 
-  #kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
+
+  if kpts!=None:
+   kpts=cell.make_kpts([lattice_v,lattice_v,lattice_v])
   pbc_elec=pbcdft.KRKS(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
   #print(pbc_elec.kpts)
 
@@ -223,6 +224,11 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,verbosi
    print("Using default density fitting auxiliary basis.",file=outputfile)
    pbc_elec.with_df.auxbasis="weigand"
    pbc_elec.with_df=pdf.GDF(cell)
+  elif pyscf_settings[12]=="multigrid":
+    print("Using multigrid density fitting.",file=outputfile)
+    from pyscf.pbc.dft import multigrid
+    pbc_elec.with_df = multigrid.MultiGridFFTDF(cell, kpts)
+
   else:
    print("Using given density fitting auxiliary basis.",file=outputfile)
    pbc_elec.with_df.auxbasis=pyscf_settings[8]
@@ -231,12 +237,56 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,verbosi
   pbc_elec.chkfile=pyscf_settings[9]+".chk"
   pbc_elec.output=pyscf_settings[9]+".log"
   pbc_elec.ecp=ecp
-  #pbc_elec.with_df._cderi_to_save='test_save'
+  pbc_elec.diis_start_cycle=pyscf_conv_settings[2]
+
+  if pyscf_conv_settings[5]=="adiis":
+   pbc_elec.DIIS=pbcscf.ADIIS
+  elif pyscf_conv_settings[5]=="ediis":
+   pbc_elec.DIIS=pbcscf.EDIIS
+  elif pyscf_conv_settings[5]=="soscf":
+   pbc_elec=pbc_elec.newton()
+  if pyscf_conv_settings[12]!=None:
+   pbc_elec=pbcscf.addons.smearing_(pbc_elec, sigma=pyscf_conv_settings[13], method=pyscf_conv_settings[12]).run()
+  if pyscf_conv_settings[14]==True:
+   pbc_elec= scf.addons.remove_linear_dep_(pbc_elec).run()
+
   pbc_elec.xc=dft_functional
   pbc_elec.incore_anyway=True
   pbc_elec.kernel()
+
+ elif pyscf_settings[0]=="rhf":
+  pbc_elec=pbcscf.KRHF(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
+
+  if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+    print("Not using density fitting.",file=outputfile)
+  elif pyscf_settings[12]=="df_default":
+   print("Using default density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis="weigand"
+   pbc_elec.with_df=pdf.GDF(cell)
+  else:
+    print("Using given density fitting auxiliary basis.",file=outputfile)
+    pbc_elec.with_df.auxbasis=pyscf_settings[8]
+    pbc_elec.with_df=pdf.GDF(cell)
+
+  pbc_elec.diis_start_cycle=pyscf_conv_settings[2]
+  if pyscf_conv_settings[5]=="adiis":
+   pbc_elec.DIIS=pbcscf.ADIIS
+  elif pyscf_conv_settings[5]=="ediis":
+   pbc_elec.DIIS=pbcscf.EDIIS
+  elif pyscf_conv_settings[5]=="soscf":
+   pbc_elec=pbc_elec.newton()
+  if pyscf_conv_settings[12]!=None:
+   pbc_elec=pbcscf.addons.smearing_(pbc_elec, sigma=pyscf_conv_settings[13], method=pyscf_conv_settings[12]).run()
+
+  
+  pbc_elec.chkfile=pyscf_settings[9]+".chk"
+  pbc_elec.output=pyscf_settings[9]+".log"
+  pbc_elec.ecp=ecp
+  pbc_elec.incore_anyway=True
+  pbc_elec.kernel()
  else:
-  print("Only PBC-DFT is currently supported. Please use es_method=\"dft\".",file=outputfile)
+  print("Due to PySCF updates, only PBC-DFT is currently supported. Please use es_method=\"dft\".",file=outputfile)
+
  h_scf=pbc_elec.get_fock()
  h_scf=h_scf*27.2114
  s=pbc_elec.get_ovlp()
@@ -295,7 +345,7 @@ def esc_pyscf(geofile,dft_functional,basis_set,ecp,convtol,maxiter,pyscf_setting
    #pyscf_elec.xc = dft_functional
    pyscf_elec.kernel()
    if pyscf_elec.converged==False:
-    pyscf_elec=dft.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec=scf.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
     pyscf_elec.damp=0.5
     pyscf_elec.diis_start_cycle=2
     pyscf_elec.kernel()
@@ -414,7 +464,7 @@ def esc_pyscf_wbl(geofile,dft_functional,basis_set,ecp,convtol,maxiter,num_elec_
    #pyscf_elec.xc = dft_functional
    pyscf_elec.kernel()
    if pyscf_elec.converged==False:
-    pyscf_elec=dft.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
+    pyscf_elec=scf.RHF(geo).set(max_cycle=2*maxiter,conv_tol=convtol,level_shift=0.2)
     pyscf_elec.damp=0.5
     pyscf_elec.diis_start_cycle=2
     pyscf_elec.kernel()
@@ -817,15 +867,8 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    print("MCSCF method not recognized. Use casscf or casci keywords.",file=outputfile)
    exit()
   mc.analyze()
-
-  #Print out orbitals(old)
-  #if pyscf_settings[8]==True:
-  # if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
-  #  tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
-  # else:
-  #  tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scforb.molden")
-   # tools.cubegen.orbital(geo,"scf_orbitals.cube",pyscf_elec.mo_coeff,resolution=0.02,margin=6.0)
-  #The remainder of this file builds the PDFT fock matrix in an ao basis
+  
+  #The next part builds the PDFT fock matrix in an ao basis
   #The next two lines build the wave function-like parts of the fock matrix.
   dm = mc.make_rdm1()
   F = mc.get_hcore () + mc._scf.get_j(mc,dm)
@@ -838,6 +881,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
   h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo)
 
+# print scf and mcscf(if casscf is used) orbitals to molden files for visualization
  if pyscf_settings[8]==True:
   if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
     tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scf.molden")
