@@ -208,7 +208,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
  if pyscf_settings[0]=="dft":
   outputfile=open(pyscf_settings[9]+".log",'w')
   if meshnum != None:
-   mesh_vec=[int(lattice_v[0]*meshnum),int(lattice_v[1]*meshnum),int(lattice_v[2]*meshnum)]
+   mesh_vec=[meshnum,meshnum,meshnum]
   else:
    mesh_vec=None
   cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=pyscf_settings[5],dimension=cell_dim,spin=pyscf_conv_settings[11])
