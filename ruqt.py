@@ -809,7 +809,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    print("SCF method not recognized. Use rks or rhf keywords.",file=outputfile)
    exit()
 
-  if pyscf_conv_settings[7]==True:
+  if pyscf_conv_settings[7]==True and pyscf_settings[1]!="casscf":
    mo_old=read_molel_orbs(shape(pyscf_elec.mo_coeff[1]),pyscf_conv_setting[8])
    pyscf_elec.mo_coeff=mo_old
 
@@ -818,7 +818,11 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   if pyscf_settings[1]=="casscf":
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
     mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
-    mo=mc2.sort_mo(pyscf_settings[6])
+    if pyscf_conv_settings[7]==True:
+     from pyscf import lib
+     mo = lib.chkfile.load(pyscf_settings[9]+".chk", 'mcscf/mo_coeff').sort_mo(pyscf_settings[6])
+    else:
+     mo=mc2.sort_mo(pyscf_settings[6])
     mc2.kernel(mo)
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
     if pyscf_settings[11] != 1:

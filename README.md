@@ -3,7 +3,7 @@ Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Funct
 
 Most recent changes:
 
-(12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our youtube channel for tutorials on how to use pyRUQT: https://www.youtube.com/@hoyresearchgroup
+(12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our YouTube channel for tutorials on how to use pyRUQT for charge transport calculations: https://www.youtube.com/@hoyresearchgroup
 
 (12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.
 
@@ -42,7 +42,7 @@ New features:
 
 Required:
 
-Python3 (pref 3.9+), Numpy, Scipy, and Maes_calctplotlib
+Python3 (pref 3.9+), Numpy, Scipy, and Matplotlib
 
 MKL (RUQT-Fortran)
 
@@ -56,7 +56,7 @@ NEGF and ES Calculator Options and Required Supporting Libraries. Only 1 of the 
        
 Electronic Structure Calculator Options. Only 1 of the following are required but both recommended:
 
-    OpenMolcas(sandx_fock branch) installation (best run as separate calculations but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
+    OpenMolcas(sandx_fock branch) installation (best run as separate calculation but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
 
     PySCF (enables non-Molcas NEGF-DFT/MC-PDFT transport calculations by pyRUQT) from https://pyscf.org/
        
@@ -64,7 +64,7 @@ Quick Installation (for now, Python package install coming in future)
 
     Put the pyruqt.py and ruqt.py files in your python module folder.
 
-    Install ASE, OpenMolcas(sandx_fock branch), and optionally PySCF for all users.
+    Install ASE, OpenMolcas(sandx_fock branch), and PySCF for all users.
 
     Use the run_pyRUQT.py script in the examples to get started running calculations. Check out https://www.youtube.com/@hoyresearchgroup for tutorial videos
 
