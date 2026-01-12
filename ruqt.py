@@ -816,16 +816,15 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
   #print("Using t"+pyscf_settings[4]+" for MCPDFT functional")
   if pyscf_settings[1]=="casscf":
-   nAct, nActEl=pyscf_settings[2]
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
-    mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
+    mc2 = mcscf.CASSCF(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_conv_settings[7]==True:
      from pyscf import lib
      mo = lib.chkfile.load(pyscf_settings[9]+".chk", 'mcscf/mo_coeff').sort_mo(pyscf_settings[6])
     else:
      mo=mc2.sort_mo(pyscf_settings[6])
     mc2.kernel(mo)
-    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel(mc2.mo_coeff)
@@ -834,39 +833,38 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
     mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
     mc2.kernel(orbs)
-    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel(mc2.mo_coeff)
 
    else:
-    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel()
 
   elif pyscf_settings[1]=="casci":
-   nAct, nActEl=pyscf_settings[2]
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
-    mc2 = mcscf.CASCI(pyscf_elec, nAct, nActEl)
+    mc2 = mcscf.CASCI(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
     mo=mc2.sort_mo(pyscf_settings[6])
     mc2.kernel(mo)
-    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel(mc2.mo_coeff)
 
    if pyscf_settings[7]==True and pyscf_settings[6] != []:
     nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
-    mc2 = mcscf.CASCI(pyscf_elec, nAct, nActEl)
+    mc2 = mcscf.CASCI(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
     mc2.kernel(orbs)
-    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel(mc2.mo_coeff)
 
    else:
-    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], nAct, nActEl)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 1:
      mc.fcisolver.nroots = pyscf_settings[11]
     mc.kernel()
@@ -922,8 +920,8 @@ def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
  if mc != "None":
   nAO = mc.mo_coeff.shape[1]
   mo_coef = mc.mo_coeff
-  nAct=mc.ncas
-  nActEl=mc.nelecas
+  nAct=pyscf_settings[2][0]
+  nActEl=pyscf_settings[2][1]
  else:
   nAO= pyscf_elec.mo_coeff.shape[1]
   mo_coef=pyscf_elec.mo_coeff
