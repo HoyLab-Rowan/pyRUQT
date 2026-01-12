@@ -920,7 +920,8 @@ def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
  if mc != "None":
   nAO = mc.mo_coeff.shape[1]
   mo_coef = mc.mo_coeff
-  nAct,nActEl= mc.ncas, mc.nelecas
+  nAct=mc.ncas
+  nActEl=mc.nelecas
  else:
   nAO= pyscf_elec.mo_coeff.shape[1]
   mo_coef=pyscf_elec.mo_coeff
