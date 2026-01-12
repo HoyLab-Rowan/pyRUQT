@@ -816,6 +816,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
   #print("Using t"+pyscf_settings[4]+" for MCPDFT functional")
   if pyscf_settings[1]=="casscf":
+   nAct, nActEl=pyscf_settings[2]
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
     mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
     if pyscf_conv_settings[7]==True:
@@ -845,6 +846,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc.kernel()
 
   elif pyscf_settings[1]=="casci":
+   nAct, nActEl=pyscf_settings[2]
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
     mc2 = mcscf.CASCI(pyscf_elec, nAct, nActEl)
     mo=mc2.sort_mo(pyscf_settings[6])
