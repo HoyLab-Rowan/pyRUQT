@@ -2,6 +2,8 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 Most recent changes:
+(1/2026): Preparing package for upload to PyPi and version 0.9 release. (Ongoing)
+
 (12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our YouTube channel for tutorials on how to use pyRUQT for charge transport calculations: https://www.youtube.com/@hoyresearchgroup
 
 (12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.

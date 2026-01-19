@@ -20,9 +20,9 @@ install_requires = [
 ]
 
 setup(name="pyRUQT",
-      version="1.0.0",
+      version="0.9.0",
       description="Rowan University Quantum Transport (Python-version)",
-      url="https://github.com/HoyLab-Rowan",
+      url="https://github.com/HoyLab-Rowan/PyRUQT",
       maintainer="Hoy Research Group",
       author='Erik P. Hoy',
       author_email="hoy@rowan.edu", 
@@ -33,7 +33,7 @@ setup(name="pyRUQT",
       python_requires='>=' + '.'.join(str(num) for num in python_min_version),
       install_requires=install_requires,
       classifiers=[
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
         'License :: OSI Approved :: GNU Lesser General Public License v3 or later (GPLv3.0)',  
         'Operating System :: POSIX :: Linux',
