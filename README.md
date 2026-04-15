@@ -2,6 +2,9 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 Most recent changes:
+(4/2026): Initial 0.9 PyPi package released. WBL calculations are still being debugged for this release and have been disabled. Use main branch and compile RUQT separately to use WBL calculations.
+
+(1/2026): Preparing package for upload to PyPi and version 0.9 release. 
 
 (12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our YouTube channel for tutorials on how to use pyRUQT for charge transport calculations: https://www.youtube.com/@hoyresearchgroup
 
@@ -50,23 +53,23 @@ NEGF and ES Calculator Options and Required Supporting Libraries. Only 1 of the 
 
     For sie_negf class: Atomic Simulation Environment from https://wiki.fysik.dtu.dk/ase/
 
-    For wbl_negf class: Compiled RUQT executable. Compile the RUQT.x executable in the RUQT subdirectory.
+    For wbl_negf class: Compiled RUQT executable. For pip install will be included as a library in WBL_RUQT. 
 
     For es_calc class: PySCF from https://pyscf.org/
        
 Electronic Structure Calculator Options. Only 1 of the following are required but both recommended:
 
+    PySCF (enables NEGF-DFT/MC-PDFT transport calculations by pyRUQT) from https://pyscf.org/
+
     OpenMolcas(sandx_fock branch) installation (best run as separate calculation but can be run by pyRUQT) from https://gitlab.com/Molcas/OpenMolcas/-/tree/sandx_fock
 
-    PySCF (enables non-Molcas NEGF-DFT/MC-PDFT transport calculations by pyRUQT) from https://pyscf.org/
-       
-Quick Installation (for now, Python package install coming in future)
+Quick Installation
 
-    Put the pyruqt.py and ruqt.py files in your python module folder.
+    For Linux, use pip install:
 
-    Install ASE, OpenMolcas(sandx_fock branch), and PySCF for all users.
+    pip install pyruqt
 
-    Use the run_pyRUQT.py script in the examples to get started running calculations. Check out https://www.youtube.com/@hoyresearchgroup for tutorial videos
+    Note that the pip version of the package is only tested with Linux.
 
 If you use this code in your research please cite:
 
@@ -80,3 +83,5 @@ If you use the RUQT-Fortran transport engine also cite:
 
 3. Erik P. Hoy, David A. Mazziotti, and Tamar Seideman, “Development and application of a 2-electron reduced density matrix approach to electron transport 
 via molecular junctions”, J. Chem. Phys. 147, 184110 (2017). https://doi.org/10.1063/1.4986804
+
+Be sure to cite the relevent PySCF or MOLCAS papers depending on which electronic structure calculations you do.
