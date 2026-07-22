@@ -2,7 +2,9 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 Most recent changes:
-(4/2026): Initial 0.9 PyPi package released. WBL calculations are still being debugged for this release and have been disabled. Use main branch and compile RUQT separately to use WBL calculations.
+(7/2026): WBL calculations are fully debugged and code restructured for PyPi distribution. Will replace the main branch with this version soon.
+
+(4/2026): Initial 0.9 PyPi package released on TestPyPI. WBL calculations are still being debugged for this release and have been disabled. Use main branch and compile RUQT separately to use WBL calculations.
 
 (1/2026): Preparing package for upload to PyPi and version 0.9 release. 
 
