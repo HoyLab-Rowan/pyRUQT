@@ -1,0 +1,26 @@
+Metadata-Version: 2.1
+Name: pyRUQT
+Version: 0.9.0
+Summary: Python-based Rowan University Quantum Transport (pyRUQT)
+Author-Email: "Erik P. Hoy" <hoy@rowan.edu>
+Maintainer: Hoy Research Group
+License: LGPL-3.0
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Science/Research
+Classifier: Operating System :: Unix
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Scientific/Engineering :: Chemistry
+Classifier: Topic :: Scientific/Engineering :: Physics
+Project-URL: Homepage, https://github.com/HoyLab-Rowan/PyRUQT
+Requires-Python: >=3.9
+Requires-Dist: numpy>=1.21.6
+Requires-Dist: scipy>=1.8.1
+Requires-Dist: matplotlib>=3.5.2
+Requires-Dist: ase>=3.22.0
+Provides-Extra: pyscf
+Requires-Dist: pyscf>=2.0.0; extra == "pyscf"
+

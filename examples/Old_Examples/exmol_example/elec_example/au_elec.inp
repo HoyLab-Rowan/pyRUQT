@@ -1,0 +1,35 @@
+&GATEWAY
+coord=au_elec.xyz
+basis=LANL2DZ
+group=nosym
+
+
+&SEWARD
+NODEleted
+grid input
+grid=fine
+end of grid input
+
+&SCF
+
+&RASSCF &END
+nActEl
+6 0 0
+INACTIVE
+35
+RAS2
+6
+DELEted
+0 0 0 0
+Symmetry
+1
+Spin
+1
+CIROot
+1 1; 1
+
+  &MCPDFT &END
+  KSDFT=T:PBE
+  GRADIENT
+  End of input
+

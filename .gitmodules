@@ -1,0 +1,3 @@
+[submodule "RUQT"]
+	path = RUQT
+	url = https://github.com/HoyLab-Rowan/RUQT/tree/ruqt_engine

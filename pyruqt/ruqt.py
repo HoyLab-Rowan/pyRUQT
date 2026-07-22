@@ -1,0 +1,953 @@
+import numpy as np
+import scipy
+from pyscf import gto,dft,scf,mcscf,mcpdft,lo,tools
+from pyscf.mcscf import avas
+from ase import transport,Atoms,units
+import matplotlib.pyplot as plt
+import string,subprocess
+from functools import reduce
+
+#This is the main module file for the pyRUQT program which contains all functions needed to run pyRUQT.
+
+#These functions are new RUQT routines for getting properties not calculated by ASE
+
+#Calculates differental conductance
+def get_diffcond(calc,bias,temp,energies,T,fd_change,ase_current,delta_e):
+ p_bias=bias+fd_change
+ n_bias=bias-fd_change
+ if ase_current==True:
+  I_p=calc.get_current(p_bias,T=temp,E=energies,T_e=T)
+  I_n=calc.get_current(n_bias,T=temp,E=energies,T_e=T)
+ else:
+  I_p=get_current(p_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
+  I_n=get_current(n_bias,T=temp,E=energies,T_e=T,delta_e=delta_e)
+ b_range=len(bias)
+ DE=np.zeros(b_range)
+ for x in range(b_range):
+  DE[x]=(I_p[x]-I_n[x])/(p_bias[x]-n_bias[x])
+ return DE
+
+#Aligns all diagonal elments of the repeating electrode blocks in H_elec and H_exmol
+def full_align(h_mm,h1_ii,s_mm,elec_units):
+ import numpy
+
+ n=int(len(h1_ii)/elec_units-1)
+ diff=0.0
+ for i in range(0,n-1):
+  diff += ((h_mm[i,i] - h1_ii[i, i])/s_mm[i, i])
+ diff2=diff/(n+1)
+ h_mm -= diff2 * s_mm
+ return h_mm
+
+#Functions are used by pyRUQT to gather data for NEGF calculations
+
+#These are the newer Molcas data reading routines
+#Reads MolEl.dat files from post-July 2022 Molcas (sandx_fock branch)
+def molel_matread(matrixfile,norb,data_mat,mat_type):
+ if mat_type=='S':
+  line=matrixfile.readline()
+  while "Molecular orbital coefficients" not in line:
+   line_data=line.split()
+   data_mat[int(line_data[0])-1,int(line_data[1])-1]=float(line_data[2])
+   data_mat[int(line_data[1])-1,int(line_data[0])-1]=float(line_data[2])
+   line=matrixfile.readline()
+
+ elif mat_type=='H':
+   line=matrixfile.readline()
+   while "State" and "Orbital Energies" not in line:
+    line_data=line.split()
+    data_mat[int(line_data[0])-1,int(line_data[1])-1]=float(line_data[2])
+    line=matrixfile.readline()
+
+#New Molcas data reading routine 
+def esc_molcas2(data_dir,data_file,state_num,outputfile):
+ filesearch=open(data_dir+data_file,'r')
+ for i in range (0,2):
+  line=filesearch.readline()
+ line_data=line.split()
+ states,norb,numelec,actorb,actelec=list(map(int,line_data))
+ line=filesearch.readline()
+
+ h=np.zeros((norb,norb))
+ s=np.zeros((norb,norb))
+ print("Reading data for state "+str(state_num)+" out of "+str(states)+" elec. states.",file=outputfile)
+ molel_matread(filesearch,norb,s,"S")
+
+ while "Effective Hamiltonian" not in line:
+  line=filesearch.readline()
+
+ line=filesearch.readline()
+ line_data=line.split()
+ while int(line_data[1])!=state_num and "State" not in line:
+  line=filesearch.readline()
+  line_data=line.split()
+
+ if "Orbital Energies" in line:
+  print("Can not find your effective Hamiltonian. Check your MolEl.dat file formatting",file=outputfile)
+ elif int(line_data[1])==state_num:
+  molel_matread(filesearch,norb,h,"H")
+ h=h*27.211396641308
+ return h,s,norb,numelec,actorb,actelec,states
+
+#calculates electric structure info (Hamiltonian, Overlap) with PySCF using PBC
+def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_dim,kpts,pyscf_settings,pyscf_conv_settings):
+ from pyscf.pbc import gto as pbcgto
+ from pyscf.pbc import scf as pbcscf
+ from pyscf.pbc import dft as pbcdft
+ from pyscf.pbc import df as pdf
+
+ if pyscf_settings[0]=="dft":
+  outputfile=open(pyscf_settings[9]+".log",'w')
+  if meshnum != None:
+   mesh_vec=[meshnum,meshnum,meshnum]
+  else:
+   mesh_vec=None
+  cell=pbcgto.M(atom=geofile,basis=basis_set,pseudo=ecp,a=[[lattice_v[0],0,0],[0,lattice_v[1],0],[0,0,lattice_v[2]]],mesh=mesh_vec,verbose=pyscf_settings[5],dimension=cell_dim,spin=pyscf_conv_settings[11])
+
+  if kpts!=None:
+   cell.make_kpts(kpts)
+  pbc_elec=pbcdft.KRKS(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
+  #print(pbc_elec.kpts)
+
+  if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+   print("Not using density fitting.",file=outputfile)
+  elif pyscf_settings[12]=="df_default":
+   print("Using default density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis="weigand"
+   pbc_elec.with_df=pdf.GDF(cell)
+  elif pyscf_settings[12]=="multigrid":
+    print("Using multigrid density fitting.",file=outputfile)
+    from pyscf.pbc.dft import multigrid
+    pbc_elec.with_df = multigrid.MultiGridFFTDF(cell, kpts)
+
+  else:
+   print("Using given density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis=pyscf_settings[8]
+   pbc_elec.with_df=pdf.GDF(cell)
+
+  pbc_elec.chkfile=pyscf_settings[9]+".chk"
+  pbc_elec.output=pyscf_settings[9]+".log"
+  pbc_elec.ecp=ecp
+  pbc_elec.diis_start_cycle=pyscf_conv_settings[2]
+
+  if pyscf_conv_settings[5]=="adiis":
+   pbc_elec.DIIS=pbcscf.ADIIS
+  elif pyscf_conv_settings[5]=="ediis":
+   pbc_elec.DIIS=pbcscf.EDIIS
+  elif pyscf_conv_settings[5]=="soscf":
+   pbc_elec=pbc_elec.newton()
+  if pyscf_conv_settings[12]!=None:
+   pbc_elec=pbcscf.addons.smearing_(pbc_elec, sigma=pyscf_conv_settings[13], method=pyscf_conv_settings[12]).run()
+  if pyscf_conv_settings[14]==True:
+   pbc_elec= scf.addons.remove_linear_dep_(pbc_elec).run()
+
+  pbc_elec.xc=dft_functional
+  pbc_elec.incore_anyway=True
+  pbc_elec.kernel()
+
+ elif pyscf_settings[0]=="rhf":
+  if kpts!=None:
+   cell.make_kpts(kpts)
+  pbc_elec=pbcscf.KRHF(cell).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],exp_to_discard=0.1)
+
+  if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+    print("Not using density fitting.",file=outputfile)
+  elif pyscf_settings[12]=="df_default":
+   print("Using default density fitting auxiliary basis.",file=outputfile)
+   pbc_elec.with_df.auxbasis="weigand"
+   pbc_elec.with_df=pdf.GDF(cell)
+  else:
+    print("Using given density fitting auxiliary basis.",file=outputfile)
+    pbc_elec.with_df.auxbasis=pyscf_settings[8]
+    pbc_elec.with_df=pdf.GDF(cell)
+
+  pbc_elec.diis_start_cycle=pyscf_conv_settings[2]
+  if pyscf_conv_settings[5]=="adiis":
+   pbc_elec.DIIS=pbcscf.ADIIS
+  elif pyscf_conv_settings[5]=="ediis":
+   pbc_elec.DIIS=pbcscf.EDIIS
+  elif pyscf_conv_settings[5]=="soscf":
+   pbc_elec=pbc_elec.newton()
+  if pyscf_conv_settings[12]!=None:
+   pbc_elec=pbcscf.addons.smearing_(pbc_elec, sigma=pyscf_conv_settings[13], method=pyscf_conv_settings[12]).run()
+
+  
+  pbc_elec.chkfile=pyscf_settings[9]+".chk"
+  pbc_elec.output=pyscf_settings[9]+".log"
+  pbc_elec.ecp=ecp
+  pbc_elec.incore_anyway=True
+  pbc_elec.kernel()
+ else:
+  print("Due to PySCF updates, only PBC-DFT is currently supported. Please use es_method=\"dft\".",file=outputfile)
+
+ h_scf=pbc_elec.get_fock()
+ h_scf=h_scf*27.2114
+ s=pbc_elec.get_ovlp()
+ norb=len(h_scf)
+ numelec=int(np.sum(pbc_elec.mo_occ))
+
+ print ('NORB:',norb,'NUMELEC:',numelec)
+ print ('h_scf:',h_scf)
+ return h_scf,s,norb,numelec
+
+#calculates electric structure info (Hamiltonian, Overlap) with non-PBC PySCF
+def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_settings,pyscf_conv_settings):
+ #from pyscf import gto,dft,scf
+
+ outputfile=open(pyscf_settings[9]+".out",'w')
+ geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5],output=pyscf_settings[9]+".log",spin=pyscf_conv_settings[11],charge=pyscf_conv_settings[10])
+ h_final=0
+ s_final=0
+ norb=0
+ numelec=0
+
+ if pyscf_settings[0]=="dft":
+  if pyscf_settings[3]=="rks":
+   if "diis" in pyscf_conv_settings[5]:
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec.xc=dft_functional
+    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
+    if pyscf_conv_settings[5]=="adiis":
+     pyscf_elec.DIIS=scf.ADIIS
+    elif pyscf_conv_settings[5]=="ediis":
+     pyscf_elec.DIIS=scf.EDIIS
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+    pyscf_elec.kernel()
+
+    if pyscf_elec.converged==False:
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+     exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+
+
+   elif "soscf" in pyscf_conv_settings[5]:
+    #print("Using SOSCF")
+    #for i in range(1,pyscf_conv_settings[5]):
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+     #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
+    pyscf_elec.xc=dft_functional
+    pyscf_elec=pyscf_elec.newton()
+    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+#    pyscf_elec.newton()
+    pyscf_elec.kernel()
+
+    if pyscf_elec.converged==False:
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+     exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+  else:
+   print("DFT/SCF choice not supported",file=pyscf_settings[9]+".out")
+   exit()
+   #norb=len(h)
+   #numelec=int(np.sum(pyscf_elec.mo_occ))
+ elif pyscf_settings[0]=="mcpdft":
+  #Pyscf mcpdft routine modified from original version created by Dr. Andrew Sand (Butler University)
+  [nActEl,nAct]=pyscf_settings[2]
+  if pyscf_settings[3]=="rks":
+   if "diis" in pyscf_conv_settings[5]:
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec.xc=dft_functional
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
+    if pyscf_conv_settings[5]=="adiis":
+     pyscf_elec.DIIS=scf.ADIIS
+    elif pyscf_conv_settings[5]=="ediis":
+     pyscf_elec.DIIS=scf.EDIIS
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+    pyscf_elec.kernel()
+
+    if pyscf_elec.converged==False:
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+     exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+
+
+   elif "soscf" in pyscf_conv_settings[5]:
+    #print("Using SOSCF")
+    #for i in range(1,pyscf_conv_settings[5]):
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+     #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
+    pyscf_elec.xc=dft_functional
+    pyscf_elec=pyscf_elec.newton()
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+#    pyscf_elec.newton()
+    pyscf_elec.kernel()
+
+   if pyscf_elec.converged==False:
+    print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+    exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+
+
+  elif pyscf_settings[3]=="rhf":
+   if "diis" in pyscf_conv_settings[5]:
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec.init_guess = pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
+    if pyscf_conv_settings[5]=="adiis":
+     pyscf_elec.DIIS=scf.ADIIS
+    elif pyscf_conv_settings[5]=="ediis":
+     pyscf_elec.DIIS=scf.EDIIS
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+    pyscf_elec.kernel()
+
+    if pyscf_elec.converged==False:
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+     exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+   elif "soscf" in pyscf_conv_settings[5]:
+    #print("Using SOSCF")
+    #for i in range(1,pyscf_conv_settings[5]):
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=scf.RHF(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+     #scf.addons.dynamic_level_shift_(pyscf_elec,factor=0.5)
+    pyscf_elec.xc=dft_functional
+    pyscf_elec=pyscf_elec.newton()
+    pyscf_elec.init_guess=pyscf_conv_settings[6]
+    pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+    pyscf_elec.output=pyscf_settings[9]+".log"
+    pyscf_elec.damp=pyscf_conv_settings[3]
+    if pyscf_conv_settings[9]==True:
+     pyscf_elec=scf.addons.frac_occ(pyscf_elec)
+#    pyscf_elec.newton()
+    pyscf_elec.kernel()
+
+    if pyscf_elec.converged==False:
+     print("Your SCF calculation did not converge using"+str(pyscf_conv_settings[5])+" optimizer. Check your settings.",file=outputfile)
+     exit()
+    h = pyscf_elec.get_fock()
+#    h=h*27.2114
+    s = pyscf_elec.get_ovlp()
+    h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,"None",geo)
+
+
+  elif pyscf_settings[3]=="chkfile":
+   if pyscf_conv_settings[5].lower()=="diis" or pyscf_conv_settings[5]==None:
+    if pyscf_settings[12]=="no_df" or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    pyscf_elec.xc=dft_functional
+    pyscf_elec.diis_start_cycle=pyscf_conv_settings[2]
+
+   elif pyscf_conv_settings[5].lower=="soscf":
+    if pyscf_settings[12]=="no_df"  or pyscf_settings[12]==None:
+      print("Not using density fitting.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    elif pyscf_settings[12]=="df_default":
+      print("Using default density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+    else:
+      print("Using given density fitting auxiliary basis.",file=outputfile)
+      pyscf_elec=dft.RKS(geo).density_fit().set(max_cycle=pyscf_conv_settings[0],conv_tol=pyscf_conv_settings[1],level_shift=pyscf_conv_settings[4])
+      pyscf_elec.with_df.auxbasis=pyscf_settings[8]
+    pyscf_elec=pyscf_elec.newton()
+    pyscf_elec.xc=dft_functional
+   
+   pyscf_elec.init_guess=pyscf_conv_settings[6]
+   pyscf_elec.chkfile=pyscf_settings[9]+".chk"
+   pyscf_elec.damp=pyscf_conv_settings[3]
+   pyscf_elec.kernel()
+
+  else:
+   print("SCF method not recognized. Use rks or rhf keywords.",file=outputfile)
+   exit()
+
+  if pyscf_conv_settings[7]==True and pyscf_settings[1]!="casscf":
+   mo_old=read_molel_orbs(shape(pyscf_elec.mo_coeff[1]),pyscf_conv_setting[8])
+   pyscf_elec.mo_coeff=mo_old
+
+  #Now, we perform the CASSCF or CASCI.  The PDFT functional is tPBE by default and is changed in pyscf_settings not using dft_functional.
+  #print("Using t"+pyscf_settings[4]+" for MCPDFT functional")
+  if pyscf_settings[1]=="casscf":
+   if pyscf_settings[6] != [] and pyscf_settings[7]==False:
+    mc2 = mcscf.CASSCF(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_conv_settings[7]==True:
+     from pyscf import lib
+     mo = lib.chkfile.load(pyscf_settings[9]+".chk", 'mcscf/mo_coeff').sort_mo(pyscf_settings[6])
+    else:
+     mo=mc2.sort_mo(pyscf_settings[6])
+    mc2.kernel(mo)
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
+   elif pyscf_settings[7]==True and pyscf_settings[6] != []:
+    nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
+    mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
+    mc2.kernel(orbs)
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
+   else:
+    mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel()
+
+  elif pyscf_settings[1]=="casci":
+   if pyscf_settings[6] != [] and pyscf_settings[7]==False:
+    mc2 = mcscf.CASCI(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
+    mo=mc2.sort_mo(pyscf_settings[6])
+    mc2.kernel(mo)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
+   if pyscf_settings[7]==True and pyscf_settings[6] != []:
+    nAct, nActEl, orbs = avas.avas(pyscf_elec,pyscf_settings[6])
+    mc2 = mcscf.CASCI(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
+    mc2.kernel(orbs)
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel(mc2.mo_coeff)
+
+   else:
+    mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    if pyscf_settings[11] != 1:
+     mc.fcisolver.nroots = pyscf_settings[11]
+    mc.kernel()
+
+  else:
+   print("MCSCF method not recognized. Use casscf or casci keywords.",file=outputfile)
+   exit()
+  mc.analyze()
+  
+  #The next part builds the PDFT fock matrix in an ao basis
+  #The next two lines build the wave function-like parts of the fock matrix.
+  dm = mc.make_rdm1()
+  F = mc.get_hcore () + mc._scf.get_j(mc,dm)
+  #The next lines handle the potential contributions (PDFT part) to the fock matrix.
+  mc_pot, mc_pot2 = mc.get_pdft_veff()
+  h_new = F + mc_pot
+  #Now get overlap matrix
+  h=np.array(h_new)
+  s = pyscf_elec.get_ovlp()
+
+  h_final,s_final,norb,numelec=prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo)
+
+# print scf and mcscf(if casscf is used) orbitals to molden files for visualization
+ if pyscf_settings[8]==True:
+  if pyscf_settings[0]=="mcpdft" and pyscf_settings[1]=="casscf":
+    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scf.molden")
+    tools.molden.from_mcscf(mc, pyscf_settings[9]+"_mc.molden", ignore_h=True, cas_natorb=False)
+   # tools.cubegen.orbital(geo,"mc_orbitals.cube",mc.mo_coeff,resolution=0.02,margin=6.0)
+  else:
+    tools.molden.from_scf(pyscf_elec,pyscf_settings[9]+"_scf.molden")
+
+ ao_data=gto.mole.ao_labels(geo,fmt=False)
+
+ atom_num=0
+ ao_index=0
+ elec_orb=0
+ ao_data_len=len(ao_data)
+ while atom_num < num_elec_atoms: 
+  atom_num=ao_data[ao_index][0]
+  ao_index+=1
+  if ao_index == ao_data_len:
+   print("The # of electrode atoms is incorrect",file=outputfile)
+   break
+ elec_orb=ao_index-1
+ return h_final,s_final,norb,numelec,elec_orb
+
+#The next 2 routines print pyscf data to a MolEl.dat file for use in reruns
+def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
+ norb=len(h)
+ numelec=int(np.sum(pyscf_elec.mo_occ))
+ nTotEl = geo.nelec[0]+ geo.nelec[1]
+ if mc != "None":
+  nAO = mc.mo_coeff.shape[1]
+  mo_coef = mc.mo_coeff
+  nAct=pyscf_settings[2][0]
+  nActEl=pyscf_settings[2][1]
+ else:
+  nAO= pyscf_elec.mo_coeff.shape[1]
+  mo_coef=pyscf_elec.mo_coeff
+  nAct=0
+  nActEl=0
+ print_molel(h,s,norb,numelec,nTotEl,nAct,nActEl,nAO,mo_coef)
+ h=h*27.211396641308
+ return h,s,norb,numelec
+
+def print_molel(h,s,norb,numelec,nTotEl,nAct,nActEl,nAO,mo_coef):
+
+ f = open("MolEl.dat", "w")
+ f.write("Number of states,orbitals,electrons,ActOrb,ActEl \n")
+ f.write("1 " + str(mo_coef.shape[1]) + " " + str(nTotEl) + " " + str(nAct) + " " + str(nActEl) + '\n')
+
+
+ f.write("Overlap Matrix (AO) \n")
+ for x in range(nAO):
+    for y in range(x + 1):
+        f.write(f'{x + 1} {y + 1} {s[x][y]} \n')
+
+ f.write("Molecular orbital coefficients \n")
+ for x in range(nAO):
+    for y in range(nAO):
+        f.write(f'{x + 1} {y + 1} {mo_coef[x][y]} \n')
+
+ f.write("Effective Hamiltonian(s) (AO) \n")
+ f.write("State 1 \n")
+ for x in range(nAO):
+    for y in range(nAO):
+        f.write(f'{x + 1} {y + 1} {h[x][y]} \n')
+
+ f.write("Orbital Energies")
+
+#This routine is used by esc_pyscf2 to get orbital numbers from an old MolEl.dat
+def read_molel_orbs(nAO,molel_read_dir):
+ f = open(molel_read_dir+"/MolEl.dat", "r")
+
+ content=f.readlines()
+ mo_coeff=np.zeros((nAO,nAO),dtype=float)
+ for row in f:
+  word="Molecular orbital coefficients"
+  if row.find(word) !=-1:
+   mo_line=lines.index(row)+1
+ for x in range(nAO):
+  for y in range(nAO):
+   line_data=line.split(content[mo_line])
+   mo_coeff[int(line_data[0])-1][int(line_data[1])-1]=float(line_data[2])
+   mo_line+=1
+
+ return mo_coeff
+                   
+#These routines calculate the electrode-molecule coupling when coupling_calc is set to Fock_EX
+def calc_coupling(h,s,h1,h2,s1,s2,coupled,elec_units):
+ import numpy as np
+ #l_h_dim=np.ndarray.shape(h)
+ #l_h1_dim=np.ndarray.size(h1)
+ l_h=len(h)
+ l_h1_0=len(h1)
+ l_h1=l_h1_0//elec_units
+ l_mol=l_h-2*l_h1
+ hc1=np.zeros((l_h1,l_h),dtype=np.complex)
+ sc1=np.zeros((l_h1,l_h),dtype=np.complex)
+ if h2==None:
+  hc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
+  sc2=np.zeros(shape=(l_h1,l_h),dtype=np.complex)
+ else:
+  l_h2_0=len(h2)
+  l_h2=l_h2_0//elec_units
+  hc2=np.zeros(shape=(l_h2,l_h),dtype=np.complex)
+  sc2=np.zeros(shape=(l_h2,l_h),dtype=np.complex)
+
+ if coupled=="molecule":
+  hc1[:l_h1,:l_h1]=h1[:l_h1,l_h1:2*l_h1]
+  sc1[:l_h1,:l_h1]=s1[:l_h1,l_h1:2*l_h1]
+  hc1[:l_h1,l_h1:(l_h-l_h1)]=h[:l_h1,l_h1:(l_h-l_h1)]
+  sc1[:l_h1,l_h1:(l_h-l_h1)]=s[:l_h1,l_h1:(l_h-l_h1)]
+  if h2==None:
+   hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
+   sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
+   hc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(h[l_h1:(l_h-l_h1),:l_h1])
+   sc2[-l_h1:,-(l_mol+l_h1):-l_h1]=np.transpose(s[l_h1:(l_h-l_h1),:l_h1])
+  else:
+   hc2[-l_h2:,-l_h2:]=h2[l_h2:2*l_h2,:l_h2]
+   sc2[-l_h2:,-l_h2:]=s2[l_h2:2*l_h2,:l_h2]
+   hc2[-l_h2:,-(l_mol+l_h2):-l_h2]=np.transpose(h[l_h2:(l_h-l_h2),:l_h2])
+   sc2[-l_h2:,-(l_mol+l_h2):-l_h2]=np.transpose(s[l_h2:(l_h-l_h2),:l_h2])
+
+ elif coupled=="extended_molecule":
+  hc1[:l_h1,:l_h1]=h1[:l_h1,l_h1:2*l_h1]
+  sc1[:l_h1,:l_h1]=s1[:l_h1,l_h1:2*l_h1]
+  hc1[:l_h1,l_h1:l_h]=h[:l_h1,l_h1:l_h]
+  sc1[:l_h1,l_h1:l_h]=s[:l_h1,l_h1:l_h]
+  if h2==None:
+   hc2[-l_h1:,-l_h1:]=h1[l_h1:2*l_h1,:l_h1]
+   sc2[-l_h1:,-l_h1:]=s1[l_h1:2*l_h1,:l_h1]
+   hc2[-l_h1:,-l_h:-l_h1]=np.transpose(h[l_h1:l_h,:l_h1])
+   sc2[-l_h1:,-l_h:-l_h1]=np.transpose(s[l_h1:l_h,:l_h1])
+  else:
+   hc2[-l_h2:,-l_h2:]=h2[l_h2:2*l_h2,:l_h2]
+   sc2[-l_h2:,-l_h2:]=s1[l_h2:2*l_h2,:l_h2]
+   hc2[-l_h2:,-l_h:-l_h2]=np.transpose(h[l_h2:l_h,:l_h2])
+   sc2[-l_h2:,-l_h:-l_h2]=np.transpose(s[l_h2:l_h,:l_h2])
+
+ return hc1,sc1,hc2,sc2
+
+#The routines below are for creating inputs/calling/getting data from RUQT-Fortran transport calculations from pyRUQT
+
+#These routines extract detailed paritioning data from RUQT-Fortan for debugging purposes (currently unused).
+def read_ruqtfortran_partdat(ruqt_dir,ruqt_file,elec_units):
+ import numpy as np
+ with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
+  line=matrixfile.readline()
+  line_data=line.split()
+  size_l=int(line_data[0])
+  size_r=int(line_data[2])
+  size_c=int(line_data[1])
+
+  h=np.zeros((size_c,size_c),dtype=np.complex)
+  s=np.zeros((size_c,size_c),dtype=np.complex)
+  h1=np.zeros(shape=(size_l,size_l),dtype=np.complex)
+  s1=np.zeros(shape=(size_l,size_l),dtype=np.complex)
+  h2=np.zeros(shape=(size_r,size_r),dtype=np.complex)
+  s2=np.zeros(shape=(size_r,size_r),dtype=np.complex)
+
+  size_lr=size_l+size_c
+  r_size=size_r//elec_units
+
+  #Read in Overlap Matrices
+  line=matrixfile.readline()
+  for i in range(1,size_l):
+   for j in range(1,size_l):
+    line=matrixfile.readline()
+    line_data=line.split()
+    h1[int(line_data[0])-1,int(line_data[1])-1]=float(line_data[2])
+
+  line=matrixfile.readline()
+  for i in range(1,size_c):
+   for j in range(1,size_c):
+    line=matrixfile.readline()
+    line_data=line.split()
+    h[int(line_data[0])-1-size_l,int(line_data[1])-1-size_l]=float(line_data[2])
+
+  line=matrixfile.readline()
+  for i in range(1,size_r):
+   for j in range(1,size_r):
+    line=matrixfile.readline()
+    line_data=line.split()
+    h2[int(line_data[0])-size_lr,int(line_data[1])-1-size_lr]=float(line_data[2])
+
+  #Read in Hamiltonian Matrices
+  line=matrixfile.readline()
+  for i in range(1,size_l):
+   for j in range(1,size_l):
+    line=matrixfile.readline()
+    line_data=line.split()
+    s1[int(line_data[0])-1,int(line_data[1])-1]=float(line_data[2])
+
+  line=matrixfile.readline()
+  for i in range(1,size_c):
+   for j in range(1,size_c):
+    line=matrixfile.readline()
+    line_data=line.split()
+    s[int(line_data[0])-1-size_l,int(line_data[1])-1-size_l]=float(line_data[2])
+
+  line=matrixfile.readline()
+  for i in range(1,size_r):
+   for j in range(1,size_r):
+    line=matrixfile.readline()
+    line_data=line.split()
+    s2[int(line_data[0])-1-size_lr,int(line_data[1])-1-size_lr]=float(line_data[2])
+
+ matrixfile.close()
+ return h,h1,h2,s,s1,s2
+
+def read_ruqtfortran_sigma(ruqt_dir,ruqt_file,elec_units):
+   
+ with open(ruqt_dir+ruqt_file+".partdat",'r') as matrixfile:
+  line=matrixfile.readline()
+  line_data=line.split()
+  size_l=int(line_data[0])
+  size_r=int(line_data[2])
+  size_c=int(line_data[1])
+
+  l_size=size_l//elec_units
+  r_size=size_r//elec_units
+  sigma1=np.zeros(shape=(l_size,size_c),dtype=np.complex)
+  sigma2=np.zeros(shape=(r_size,size_c),dtype=np.complex) 
+
+  line=matrixfile.readline()
+  for i in range(1,size_c):
+   for j in range(1,size_c):
+    line=matrixfile.readline()
+    if i <= l_size:
+     line_data=line.split()
+     sigma1[line_data[0]-1,line_data[1]-1]=line_data[2]
+
+  line=matrixfile.readline()
+  for i in range(1,size_c):
+   for j in range(1,size_c):
+    line=matrixfile.readline()
+    if i <= r_size:
+     line_data=line.split()
+     sigma2[int(line_data[0])-1,line_data[1]-1]=line_data[2]
+
+ matrixfile.close()
+ return sigma1,sigma2
+
+
+#WBL_RUQT access routines to use Ruqt-Fortran NEGF libraries
+def call_wbl_ruqt(Calc_Type,outputfile,h,s,norb,numelec,size_elec,inp,energies,bias):
+ import string
+ import math
+ from pyruqt import wbl_ruqt
+ import numpy
+#This part converts the python variables to ones recognized by the Fortran code
+
+ Electrode_Type = "Metal_WBL" #Only option currently for RUQT-Fortran
+
+ if inp["qc_method"]=="rdm":
+  rdm_doubles="T"
+ elif inp["qc_method"]=="neo":
+  qc_code="pyscf"
+  rdm_doubles="F"
+  qc_method="hf"
+ else:
+  rdm_doubles="F"
+  qc_method="dft"
+ 
+ KT=inp['temp']*8.617333262E-5
+
+ if inp["rdm_type"]==1:
+  use_b0="F"
+  b0_type="rdm"
+ elif inp["rdm_type"]==2:
+  use_b0=="T"
+  b0_type="cisd"
+ else:
+  print("RDM calculation selection not supported. Please check README for options.")
+
+ if inp["exmol_prog"]=="molcas":
+  if inp["molcas_supercell"]==True:
+   cp_fock='cp '+exmol_dir+"/MolEl.dat"+' MolEl.dat'
+
+   cpdata_1=subprocess.Popen(cp_fock,shell=True)
+   cpdata_1.wait()
+   #h,s,norb,numelec,actorb,actelec,states=esc_molcas2(exmol_dir,"MolEl.dat",state_num,outputfile) 
+   size_ex,size_elec=ruqt.read_syminfo(inp["exmol_dir"],norb,inp["num_elec_atoms"],outputfile)  
+  else:
+   size_ex=norb-2*size_elec
+  numocc=int(numelec/2)
+  numvirt=norb-numocc
+ elif inp['exmol_prog']=="maple":
+  print("Currently not working",file=outputfile)
+  norb,numocc,numvirt,size_ex,size_elec=orb_read_scfdat(inp['exmol_dir'],exmol_file,['num_elec_atoms'],outputfile)
+ elif inp['exmol_prog']=="pyscf":
+  numocc=math.ceil(numelec/2)
+  numvirt=norb-numocc
+  size_ex=norb-2*size_elec
+
+
+ h = np.asfortranarray(h, dtype=np.float64)
+ s = np.asfortranarray(s, dtype=np.float64)
+ energy_val=len(energies)
+ current_val=len(bias)
+
+ if inp["ruqt_data"] == None:
+  fortran_data=str(inp["output"])
+ else:
+  fortran_data=str(inp["ruqt_data"]) 
+ if inp["verbosity"] > 5:
+  write_fort_data=True
+ else:
+  write_fort_data=False
+ #This calls the fortran routine from the .so library
+ T,I= wbl_ruqt.ruqt_calc.wbl_negf_calc(fortran_data,norb,0,0,numocc,numvirt,size_elec,size_elec,size_ex,inp["min_trans_energy"],inp["max_trans_energy"],inp["delta_energy"],inp["min_bias"],inp["max_bias"],inp["delta_bias"],"pyruqt",KT,Electrode_Type,inp["FermiE"],inp["FermiE"],Calc_Type,inp["FermiD"],inp["FermiD"],False,norb,qc_method,4,use_b0,b0_type,write_fort_data,inp['state_num'],h, s,energy_val,current_val)
+
+ return T,I
+
+
+
+def fort_calc(ruqt_exe,calcname,energies,bias,calc_type,outputfile):
+ import subprocess,string
+ import numpy as np
+ #This is an outdated routine calls the RUQT Fortran transport calculator
+ #Make sure to have a working RUQT.x executable compiled from the Github source code (ruqt.engine branch)
+
+ run_com=ruqt_exe+' '+calcname
+ 
+ ruqt_fort=subprocess.Popen(run_com,shell=True,stdout=outputfile)
+ ruqt_fort.wait()
+
+ T=np.zeros(len(energies),dtype=float)
+ I=np.zeros(len(bias),dtype=float)
+
+ negffile=open(calcname+".negf_dat",'r')
+ line=negffile.readline()
+ num=int(line)
+ 
+ for i in range(0,num):
+  line=negffile.readline()
+  line_data=line.split()
+  T[i]=float(line_data[1])
+
+ if calc_type=="C":
+  line=negffile.readline()
+  num=int(line)
+  for i in range(0,num):
+   line=negffile.readline()
+   line_data=line.split()
+   I[i]=float(line_data[1])
+ 
+ negffile.close()
+ return T,I
+
+#These routines are improved and/or fixed versions of ASE functions for SIE calculations.
+def get_current(bias, T=None, E=None, T_e=None, spinpol=False, delta_e=None):
+
+ kB=8.617333262E-5
+
+ if not isinstance(bias, (int, float)):
+   bias = bias[np.newaxis]
+   E = E[:, np.newaxis]
+ #  T_e = T_e[:, np.newaxis]
+
+ fl = f_fermidistribution(E - bias / 2., kB * T)
+ fr = f_fermidistribution(E + bias / 2., kB * T)
+
+ iv=np.zeros(bias.size,dtype=float)
+ fl_dat=np.asarray(fl)
+ fr_dat=np.asarray(fr)
+ f_dat=fl_dat-fr_dat 
+
+ if spinpol:
+  spin=0.5
+ else:
+  spin=1.0
+
+ for b in range(bias.size):
+  for k in range(E.size):
+   iv[b]+=spin * f_dat[k,b] * T_e[k]*delta_e
+
+ return iv
+
+def f_fermidistribution(energy, kt):
+    # fermi level is fixed to zero
+    # energy can be a single number or a list
+ assert kt >= 0., 'Negative temperature encountered!'
+
+ if kt == 0:
+  if isinstance(energy, float):
+   return int(energy / 2. <= 0)
+  else:
+   return (energy / 2. <= 0).astype(int)
+ else:
+   #return 1. / (1. + np.exp(energy/kt))
+   return 1. / (1. + np.exp(energy)**(1/kt))
+
+
+#Routine to make .scf_dat file used by older RUQT-Fortran versions
+def make_scfdat(mo_coeff,mo_energies,overlap,fock_mat,calcname):
+ import numpy
+ 
+ norb=len(mo_energies)-1
+ scffile=open(calcname+".scf_dat",'w')
+ 
+ scffile.write("{0}".format("Molecular Orbital Coefficients"))
+ for x in range(0,norb):
+  for y in range(0,norb):
+  #scffile.write("{0},".format(x) + "{0},".format(y) +  "{0}".format(Smat[x,y]) + "\n")
+   scffile.write(x+y+"{0}".format(mo_coeff[x,y]) + "\n")
+ 
+ scffile.write("{0}".format("Molecular Orbital Energies"))
+ for x in range(0,norb):
+  #scffile.write("{0},".format(x) + "{0},".format(y) +  "{0}".format(Smat[x,y]) + "\n")
+  scffile.write(x+"{0}".format(mo_energies[x]) + "\n")
+
+ scffile.write("{0}".format("Overlap Matrix"))
+ for x in range(0,norb):
+  for y in range(0,norb):
+  #scffile.write("{0},".format(x) + "{0},".format(y) +  "{0}".format(Smat[x,y]) + "\n")
+   scffile.write(x+y+"{0}".format(overlap[x,y]) + "\n")
+
+ scffile.write("{0}".format("Fock Matrix"))
+ for x in range(0,norb):
+  for y in range(0,norb):
+  #scffile.write("{0},".format(x) + "{0},".format(y) +  "{0}".format(Smat[x,y]) + "\n")
+   scffile.write(x+y+"{0}".format(fock_mat[x,y]) + "\n")
