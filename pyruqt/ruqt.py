@@ -469,6 +469,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 0 and pyscf_settings[110] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel(mc2.mo_coeff)
 
    elif pyscf_settings[7]==True and pyscf_settings[6] != []:
@@ -478,12 +485,26 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel(mc2.mo_coeff)
 
    else:
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel()
 
   elif pyscf_settings[1]=="casci":
@@ -494,6 +515,13 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel(mc2.mo_coeff)
 
    if pyscf_settings[7]==True and pyscf_settings[6] != []:
@@ -503,12 +531,26 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel(mc2.mo_coeff)
 
    else:
     mc = mcpdft.CASCI(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
-    if pyscf_settings[11] != 0 and pyscf_settings[110] == 1:
+    if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
+    elif pyscf_settings[10] != 1:
+     if pyscf_settings[11] == 0:
+      weights = np.ones(pyscf_settings[10]) * (1.0 / pyscf_settings[10])
+     elif pyscf_settings[11] > 0:
+      weights = np.ones(pyscf_settings[10])* (0.2/(pyscf_settings[10]-1))
+      weights[pyscf_settings[11]] = 0.8
+     mc = mc.state_average_(weights)
     mc.kernel()
 
   else:
@@ -518,10 +560,31 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   
   #The next part builds the PDFT fock matrix in an ao basis
   #The next two lines build the wave function-like parts of the fock matrix.
-  dm = mc.make_rdm1()
+  if pyscf_settings[11] > 0 or pyscf_settings[10] > 1:
+   state_casdm1 = mc.fcisolver.states_make_rdm1(
+    mc.ci,
+    mc.ncas,
+    mc.nelecas
+    )
+
+   casdm1 = state_casdm1[pyscf_settings[11]]
+
+   mo_core = mc.mo_coeff[:, :mc.ncore]
+   mo_cas = mc.mo_coeff[:, mc.ncore:mc.ncore + mc.ncas]
+
+   dm = (
+    2.0 * mo_core @ mo_core.T + mo_cas @ casdm1 @ mo_cas.T
+    )
+  else:
+    dm = mc.make_rdm1()
+
   F = mc.get_hcore () + mc._scf.get_j(mc,dm)
   #The next lines handle the potential contributions (PDFT part) to the fock matrix.
-  mc_pot, mc_pot2 = mc.get_pdft_veff()
+  if pyscf_settings[11] > 1:
+    mc_pot, mc_pot2 = mc.get_pdft_veff(ci = mc.ci, state = pyscf_settings[11])
+  else:
+    mc_pot, mc_pot2 = mc.get_pdft_veff()
+  
   h_new = F + mc_pot
   #Now get overlap matrix
   h=np.array(h_new)
