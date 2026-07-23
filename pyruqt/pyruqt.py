@@ -31,7 +31,7 @@ class sie_negf:
                           'elec_geo'   : None,
                           'elec2_geo'  : None,
                           'state_num'  : 1, 
-                          'trans_state' : 1,
+                          'trans_state' : 0,
                           'coupling_calc' : "none",
                           'coupled'       : "molecule",
                           'spin_pol'      : False,
@@ -346,7 +346,7 @@ class wbl_negf:
                           'ecp'        : None,
                           'exmol_geo'  : None,
                           'state_num'  : 1,
-                          'trans_state' :1,
+                          'trans_state' :0,
                           'FermiE'     :-5.30,
                           'FermiD'     : 0.07,
                           'qc_method'  : "dft",
@@ -587,7 +587,9 @@ class es_calc:
                           'smearing' : None,
                           'smearing_width' : 0.05,
                           'remove_linear_dep' : True,
-                          'kpoints'      : [1,1,1]}
+                          'kpoints'      : [1,1,1],
+                          'state_num': 1,
+                          'trans_state': 0}
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
