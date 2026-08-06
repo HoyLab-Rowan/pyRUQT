@@ -460,6 +460,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
   if pyscf_settings[1]=="casscf":
    if pyscf_settings[6] != [] and pyscf_settings[7]==False:
     mc2 = mcscf.CASSCF(pyscf_elec, pyscf_settings[2][0], pyscf_settings[2][1])
+    mc2.max_cycle_macro=pyscf_conv_settings[0]
     if pyscf_conv_settings[7]==True:
      from pyscf import lib
      mo = lib.chkfile.load(pyscf_settings[9]+".chk", 'mcscf/mo_coeff').sort_mo(pyscf_settings[6])
@@ -467,7 +468,8 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
      mo=mc2.sort_mo(pyscf_settings[6])
     mc2.kernel(mo)
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
-    if pyscf_settings[11] != 0 and pyscf_settings[110] == 1:
+    mc.max_cycle_macro=pyscf_conv_settings[0]
+    if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
     elif pyscf_settings[10] != 1:
      if pyscf_settings[11] == 0:
@@ -483,6 +485,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
     mc2 = mcscf.CASSCF(pyscf_elec, nAct, nActEl)
     mc2.kernel(orbs)
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    mc.max_cycle_macro=pyscf_conv_settings[0]
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
     elif pyscf_settings[10] != 1:
@@ -496,6 +499,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
    else:
     mc = mcpdft.CASSCF(pyscf_elec, 't'+pyscf_settings[4], pyscf_settings[2][0], pyscf_settings[2][1])
+    mc.max_cycle_macro=pyscf_conv_settings[0]
     if pyscf_settings[11] != 0 and pyscf_settings[10] == 1:
      mc.state_specific_(pyscf_settings[11])
     elif pyscf_settings[10] != 1:
