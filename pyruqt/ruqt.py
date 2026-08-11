@@ -39,6 +39,10 @@ def full_align(h_mm,h1_ii,s_mm,elec_units):
  h_mm -= diff2 * s_mm
  return h_mm
 
+def fermi_shift(h,s,fermi_en):
+ h -=  fermi_en * s
+ return h,s
+
 #Functions are used by pyRUQT to gather data for NEGF calculations
 
 #These are the newer Molcas data reading routines
@@ -188,7 +192,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
 
  print ('NORB:',norb,'NUMELEC:',numelec)
  print ('h_scf:',h_scf)
- return h_scf,s,norb,numelec
+ return h_scf,s,norb,numelec,fermi_en
 
 #calculates electric structure info (Hamiltonian, Overlap) with non-PBC PySCF
 def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_settings,pyscf_conv_settings):
@@ -618,7 +622,7 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    print("The # of electrode atoms is incorrect",file=outputfile)
    break
  elec_orb=ao_index-1
- return h_final,s_final,norb,numelec,elec_orb
+ return h_final,s_final,norb,numelec,elec_orb,fermi_en
 
 #The next 2 routines print pyscf data to a MolEl.dat file for use in reruns
 def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):

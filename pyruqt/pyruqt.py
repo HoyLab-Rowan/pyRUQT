@@ -72,7 +72,9 @@ class sie_negf:
                           'smearing' : None,
                           'smearing_width' : 0.05,
                           'remove_linear_dep' : True,
-                          'kpoints'       : [1,1,1]}
+                          'kpoints'       : [1,1,1],
+                          'fixed_fermi' : 0,
+                          }
   self.param_update(**kwargs)
   
  def param_update(self,**kwargs):
@@ -119,9 +121,9 @@ class sie_negf:
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h,s,norb,numelec=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
+    h,s,norb,numelec,fermi_en=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
-    h,s,norb,numelec,elec_orb=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
+    h,s,norb,numelec,elec_orb,fermi_en=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
 
   if inp['elec_prog']=="molcas":
    h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
@@ -133,18 +135,29 @@ class sie_negf:
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
-    h1,s1,norb_le,numelec_le=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
+    h1,s1,norb_le,numelec_le,fermi_en_1=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
-    h1,s1,norb_le,numelec_le,elec_orb_le=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
+    h1,s1,norb_le,numelec_le,elec_orb_le,fermi_en_1=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    if inp['elec2_geo']!=None:
     if inp['pyscf_pbc']==True:
-     h2,s2,norb_re,numelec_re=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
+     h2,s2,norb_re,numelec_re,fermi_en_2=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
     else:
-     h2,s2,norb_re,numelec_re,elec_orb_re=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
+     h2,s2,norb_re,numelec_re,elec_orb_re,fermi_en=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
    else:
     h2=None
     s2=None
-
+   if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
+    fermi_en=inp['fixed_fermi']
+    print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
+    h,s=ruqt.fermi_shift=(h,s,fermi_en_1)
+    h1,s1=ruqt.fermi_shift=(h1,s1,fermi_en_1)
+   elif inp['fixed_fermi']==0:
+    print("Using Fermi energy from electrode calculation: "+str(fermi_en)+" eV",file=outputfile)
+    h,s=ruqt.fermi_shift=(h,s,fermi_en)
+    h1,s1=ruqt.fermi_shift=(h1,s1,fermi_en)
+   else:
+    print("Assuming Hamiltonian is already shifted by Fermi energy. Please make sure this is the case or provide a fixed Fermi energy or electrode geometry.",file=outputfile)
+   
   elif inp['elec_prog']=="supercell":
    l_elec=0
    r_elec=0
@@ -172,10 +185,20 @@ class sie_negf:
     l_elec=elec_orb
     r_elec=elec_orb
    print("Orbitals in Left and Right Electrode: "+str(elec_orb),file=outputfile)
+   if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
+    fermi_en=inp['fixed_fermi']
+    print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
+    h,s=ruqt.fermi_shift=(h,s,fermi_en)
+   elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
+    print("Using Fermi energy from electrode calculation: "+str(fermi_en)+" eV",file=outputfile)
+    h,s=ruqt.fermi_shift=(h,s,fermi_en_1)
+   else:
+    print("Assuming Hamiltonian is already shifted by Fermi energy. Please make sure this is the case or provide a fixed Fermi energy or electrode geometry.",file=outputfile)
    h1=h[:l_elec,:l_elec]
    h2=h[-r_elec:,-r_elec:]
    s1=s[:l_elec,:l_elec]
    s2=s[-r_elec:,-r_elec:]
+   #h=h[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex].copy
 
   if inp['coupling_calc']=="Fock_EX":
    hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,h2,s1,s2,inp['coupled'],inp['n_elec_units'])
