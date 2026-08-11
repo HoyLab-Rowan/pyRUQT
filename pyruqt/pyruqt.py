@@ -149,16 +149,16 @@ class sie_negf:
    if inp['fixed_fermi']!=0:
     fermi_en=inp['fixed_fermi']
     print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
-    h,s=ruqt.fermi_shift=(h,s,fermi_en)
-    h1,s1=ruqt.fermi_shift=(h1,s1,fermi_en)
+    h=ruqt.fermi_shift=(h,s,fermi_en)
+    h1=ruqt.fermi_shift=(h1,s1,fermi_en)
     if inp['elec2_geo']!=None:
-      h2,s2=ruqt.fermi_shift=(h2,s2,fermi_en)
+      h2=ruqt.fermi_shift=(h2,s2,fermi_en)
    elif inp['fixed_fermi']==0:
     print("Using Fermi energy from electrode calculation: "+str(fermi_en)+" eV",file=outputfile)
-    h,s=ruqt.fermi_shift=(h,s,fermi_en)
-    h1,s1=ruqt.fermi_shift=(h1,s1,fermi_en_1)
+    h=ruqt.fermi_shift=(h,s,fermi_en)
+    h1=ruqt.fermi_shift=(h1,s1,fermi_en_1)
     if inp['elec2_geo']!=None:
-      h2,s2=ruqt.fermi_shift=(h2,s2,fermi_en_2)
+      h2=ruqt.fermi_shift=(h2,s2,fermi_en_2)
    
   elif inp['elec_prog']=="supercell":
    l_elec=0
@@ -187,18 +187,18 @@ class sie_negf:
     l_elec=elec_orb
     r_elec=elec_orb
    print("Orbitals in Left and Right Electrode: "+str(elec_orb),file=outputfile)
-   
+
    if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
     fermi_en=inp['fixed_fermi']
     print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
-    h,s=ruqt.fermi_shift=(h,s,fermi_en)
+    hc2=ruqt.fermi_shift=(h,s,fermi_en)
    elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
     if inp['pyscf_pbc']==True:
         h1,s1,norb_le,numelec_le,fermi_en_1=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
     else:
         h1,s1,norb_le,numelec_le,elec_orb_le,fermi_en_1=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
     print("Using Fermi energy from electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
-    h,s=ruqt.fermi_shift=(h,s,fermi_en_1)
+    h=ruqt.fermi_shift=(h,s,fermi_en_1)
    else:
     print("Assuming Hamiltonian is already shifted by Fermi energy. Please make sure this is the case or provide a fixed Fermi energy or electrode geometry.",file=outputfile)
 

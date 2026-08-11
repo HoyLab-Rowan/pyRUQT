@@ -54,6 +54,9 @@ def estimate_fermi_energy(mf_object, unit='eV'):
    return fermi_hartree * 27.211386245988
   return fermi_hartree
 
+def fermi_shift(h,s,fermi_en):
+  h -= fermi_en * s
+  return h
 #These are the newer Molcas data reading routines
 #Reads MolEl.dat files from post-July 2022 Molcas (sandx_fock branch)
 def molel_matread(matrixfile,norb,data_mat,mat_type):
