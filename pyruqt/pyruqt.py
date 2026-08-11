@@ -132,6 +132,14 @@ class sie_negf:
    else:
     h2=None
     s2=None
+  if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
+    fermi_en=inp['fixed_fermi']
+    print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
+    h=ruqt.fermi_shift(h,s,fermi_en)
+    h1=ruqt.fermi_shift(h1,s1,fermi_en)
+  elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
+     print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
+     breakpoint
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
