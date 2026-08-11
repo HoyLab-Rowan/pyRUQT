@@ -55,6 +55,7 @@ def estimate_fermi_energy(mf_object, unit='eV'):
   return fermi_hartree
 
 def fermi_shift(h,s,fermi_en):
+  import numpy
   h -= fermi_en * s
   return h
 #These are the newer Molcas data reading routines
