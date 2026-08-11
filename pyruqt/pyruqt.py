@@ -209,6 +209,8 @@ class sie_negf:
       print("Using Fermi energy from PySCF electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
     else:
      print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
+     print("Assuming Hamiltonian is already shifted by Fermi energy. Please make sure this is the case or provide a fixed Fermi energy.",file=outputfile)
+     fermi_en_1=0
 
     h=ruqt.fermi_shift(h,s,fermi_en_1)
     #print(type(h))
