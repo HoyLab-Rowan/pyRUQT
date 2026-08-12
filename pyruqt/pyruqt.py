@@ -74,6 +74,7 @@ class sie_negf:
                           'remove_linear_dep' : True,
                           'kpoints'       : [1,1,1],
                           'fixed_fermi' : 0,
+                          'big_supercell' : True
                           }
   self.param_update(**kwargs)
   
@@ -139,7 +140,7 @@ class sie_negf:
     h1=ruqt.fermi_shift(h1,s1,fermi_en)
   elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
      print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
-     breakpoint
+     exit()
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
@@ -222,7 +223,9 @@ class sie_negf:
    h2=h[-r_elec:,-r_elec:]
    s1=s[:l_elec,:l_elec]
    s2=s[-r_elec:,-r_elec:]
-   #h=h[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex].copy
+   if inp['big_supercell']==False:
+    h=h[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex]
+    s=s[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex]
 
   if inp['coupling_calc']=="Fock_EX":
    hc1,sc1,hc2,sc2=ruqt.calc_coupling(h,s,h1,h2,s1,s2,inp['coupled'],inp['n_elec_units'])
