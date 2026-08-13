@@ -133,14 +133,14 @@ class sie_negf:
    else:
     h2=None
     s2=None
-  if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
+   if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
     fermi_en=inp['fixed_fermi']
     print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
     h=ruqt.fermi_shift(h,s,fermi_en)
     h1=ruqt.fermi_shift(h1,s1,fermi_en)
-  elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
+   elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
      print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
-     exit()
+     sys.exit()
 
   elif inp['elec_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
@@ -201,7 +201,7 @@ class sie_negf:
     fermi_en=inp['fixed_fermi']
     print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
     h=ruqt.fermi_shift(h,s,fermi_en)
-   elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
+   elif inp['fixed_fermi']==0 and inp['elec_geo']!=None:
     if inp['pyscf_pbc']==True:
       h1_nouse,s1_nouse,norb_le,numelec_le,fermi_en_1=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
       print("Using Fermi energy from PySCF electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
@@ -224,6 +224,7 @@ class sie_negf:
    s1=s[:l_elec,:l_elec]
    s2=s[-r_elec:,-r_elec:]
    if inp['big_supercell']==False:
+    size_ex=norb-l_elec-r_elec
     h=h[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex]
     s=s[l_elec:l_elec+size_ex,l_elec:l_elec+size_ex]
 
