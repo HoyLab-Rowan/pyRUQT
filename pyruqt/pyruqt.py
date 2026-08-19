@@ -509,7 +509,7 @@ class wbl_negf:
   print("Calculating "+str(len(energies))+" transmission energies from: "+str(max(energies))+" eV to "+str(min(energies))+" eV",file=outputfile)
   print("Final transmission values will be printed to "+inp['output']+".trans"+" in relative transmission vs eV",file=outputfile)
   T,I=ruqt.call_wbl_ruqt("transmission",outputfile,h,s,norb,numelec,elec_orb,inp,energies,bias)
-  energies=energies-inp['fermi_energy']
+  energies=energies-inp['FermiE']
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
   plt.ylabel('Transmission (rel)')
@@ -542,7 +542,7 @@ class wbl_negf:
     I = ruqt.get_current(bias,T=inp['temp'],E=energies,T_e=T,spinpol=inp['spin_pol'],delta_e=inp['delta_energy'])
    I=2.*units._e**2/units._hplanck*I
 
-  energies=energies-inp['fermi_energy']
+  energies=energies-inp['FermiE']
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
   plt.ylabel('Transmission (rel)')
@@ -581,7 +581,7 @@ class wbl_negf:
   print("Not available in RUQT-Fortran. Using RUQT-Fortan transmission with pyRUQT DiffCond calculator.",file=outputfile)
   T,I=ruqt.call_wbl_ruqt("transmission",outputfile,h,s,norb,numelec,elec_orb,inp,energies,bias)
 
-  energies=energies-inp['fermi_energy']
+  energies=energies-inp['FermiE']
   t_plot=plt.plot(energies, T)
   plt.xlabel('E-E(Fermi) (eV)')
   plt.ylabel('Transmission (rel)')
