@@ -1,4 +1,5 @@
 ##Parameters for semi-infinite electrode calculation using ASE##
+*Additional PySCF and wbl_negf keywords To be added in future*
 Format= Keyword : {Default Value,Type} : Explaination of Keyword : Options/Context
 
 ***Keywords That Generaly Need Be Defined Each Calculation***
@@ -7,7 +8,7 @@ output     : {pyruqt_results,str} : Sets the filename to be used for all calcula
 
 exmol_dir : {None,str}           : Defines location of extended molecular region geometry xyz file for pySCF or MolEl.dat for MOLCAS : Always needed
 
-elec_dir  : {None,str}           : Defines location of the left electrode xyz file or MolEl.dat                                      : Not needed if elec_prog type is "supercell", Replaced by "elec_size"
+elec_dir  : {None,str}           : Defines location of the left electrode xyz file or MolEl.dat                                      : If using a supercell, can still be given and used to calculate the Fermi level
 
 elec2_dir : {None,str}           : Defines location of right electrode xyz/MolEl.dat if not same as left electrode                   : Can be omitted if electrodes are superimposable mirror images of each other
 
@@ -16,9 +17,9 @@ elec2_dir : {None,str}           : Defines location of right electrode xyz/MolEl
 
 **Keywords that define the electronic structure programs to be used**
 
-exmol_prog : {"molcas",str} : Defines what electronic structure program is used for the extended molecular region : Options are currently "molcas" or "pyscf"
+exmol_prog : {"pyscf",str} : Defines what electronic structure program is used for the extended molecular region : Options are currently "molcas" or "pyscf"
 
-elec_prog  : {"molcas",str} : Same as exmol_prog but for the left and right electrodes                            : Additional option of "supercell" which activates the supercell method (no separate electrode calc)
+elec_prog  : {"supercell",str} : Same as exmol_prog but for the left and right electrodes                   : Default option of "supercell" activates the supercell method (no separate electrode calc required)
 
 
 **pyRUQT transport keywords**
@@ -39,7 +40,7 @@ delta_bias       : {0.1,float}     : Difference between bias voltage points in V
 
 spin_pol         : {False,logical} : Sets the current to 2*value when using data from 1-electron spin orbitals : Use if input data is from single electron orbitals vs double electron (standard for MOLCAS)
 
-dos_calc         : {False,bool}    : Generates the density of states using ASE                                 : Currently non-functional         
+dos_calc         : {False,bool}    : Generates the density of states using ASE                                 :          
 
 fd_change        : {0.001,float}   : Finite difference to be used when calculating the difference conductance  :
 
@@ -58,24 +59,24 @@ coupled       : {"molecule",str} : Defines how much of the extended molecular re
 
 n_elec_units  : {2,int}          : Number of repeating electrode units in the electrode regions                                                             : Only default of 2 currently supported
 
+fixed_fermi   : {0.0, int}       : Used to define the fermi level if an electro_geo is not given
 
 *Supercell Calculations
 
 num_elec_atoms : {0,int} : Number of atoms to be to be placed in the electrode regions for a supercell calculation. Be sure to double-check the program's calculated number of electrode orbitals in .out file when using this option.: Required to be non-zero if elec_prog="supercell"
 
 
-**Molcas specific keywords,Use if either exmol_prog or elec_prog equal "molcas"**
+**Excited States"**
 
-state_num   : {1,int} : Select CI state to be used for transport calculations         : Values other than 1 need a corresponding Effective Hamiltonian matrix to be in MolEl.dat
-
-state_num_e : {1,int} : Select excited CI state to be used for transport calculations : Unused for now
+state_num   : {1,int} : Select number of CI states to be used for transport calculations   : If more than 1 invokes state averaging for PySCF calculations
+trans_state : {1,int} : Select excited CI state to be used for transport calculations : If state_num is greater than 1 this determines the state weighting
 
 
 **PySCF specific keywords, Use if either exmol_prog or elec_prog equal "pyscf"**
 
 exmol_geo      : {None,str}      : Define the full xyz file name for extended molecular region                                               : Be sure to include any extensions in name (ex. exmol_geo="geo_file.xyz")
 
-elec_geo       : {None,str}      : Define the full xyz file name for left electrode                                                          : Can be omitted if elec_prog="supercell" 
+elec_geo       : {None,str}      : Define the full xyz file name for left electrode                                                          : If elec_prog="supercell" and exmol_prog="pyscf" can be given to calculate fermi level (otherwise a fixed_fermi value should be defined)
 
 elec2_geo      : {None,str}      : Define the full xyz file name for right electrode (if not same as left electrode)                         : Can be omitted if electrodes are superimposable mirror images of each other
 
@@ -85,12 +86,17 @@ basis_set      : {None,str}      : Defines basis set to be used by PySCF        
 
 ecp            : {None,str}      : If your basis set has an ECP (or auxbasis for PBC PySCF) it must be defined separately using this keyword : Can be left empty for non-ECP Gaussian basis like 6-31G
 
+aux_basis     :  {"df_default",str} : Density fitting basis set to use (default to PySCF default)
+
 pyscf_pbc      : {False,logical} : Uses periodic basis set for pySCF calculations instead of Gaussian orbitals                               : Requires "lattice_v" to be defined with a list of the 3 lattice vectors, [a1,b2,c3]
 
 conv_tol       : {1E-7,float}    : Defines the SCF convergence of PySCF in Hartees                                                           :
 
 max_iter       : {100,int}       : Max number of PySCF iterations allowed before SCF termination                                             :
 
+charge         : {0,int}         : Charge of transport system
+
+spin           : {0,int}         : Total spin value for transport system
 
 *PySCF Keywords when using Periodic Boundary Conditions (Along X-Axis)
 
@@ -101,5 +107,4 @@ lattice_v     : {None,float}    : List of the 3 lattice vectors in 1-D list form
 meshum        : {10,float}      : # of mesh points used by pySCF per lattice vector                          : Highly recommended to adjust from default
 verbosity     : {4,int}         : Degree of pySCF output                                                     : Recommended to use 2 for no output and 4 for useable output (must pipe script output to file via command line)
 
-*Additional PySCF keywords
-*To be added
+
