@@ -16,7 +16,9 @@ incdir_f2py = run_command(py,
 
 # Find Intel MKL (Required by RUQT)
 fc = meson.get_compiler('fortran')
-mkl_dep = dependency('mkl-static-lp64-iomp', required: true)
+lapack_dep = dependency('lapack', required: true)
+blas_dep = dependency('blas', required: true)
+#mkl_dep = dependency('mkl-static-lp64-iomp', required: true)
 add_global_arguments('-ffree-line-length-none', language : 'fortran')
 
 #This next part is only for debugging the fortran libraries (if you are rebuilding them yourself)
@@ -53,7 +55,7 @@ py.extension_module('wbl_ruqt',
   f2py_source,
   incdir_f2py / 'fortranobject.c',
   include_directories: [incdir_numpy, incdir_f2py],
-  dependencies : [py.dependency(), mkl_dep],
+  dependencies : [py.dependency(), lapack_dep, blas_dep],
   install : true,
   subdir: 'pyruqt'
 )
