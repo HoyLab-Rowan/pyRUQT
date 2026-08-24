@@ -1,4 +1,13 @@
 List of all updates to pyRUQT
+(8/2026): Main branch updated to debugged PyPI release version with integrated WBL libraries and major sie_negf fixes.
+Version 0.9 (beta) released on Github and PyPI.
+
+(7/2026): WBL calculations are fully debugged and code restructured for PyPi distribution. Will replace the main branch with this version soon.
+
+(4/2026): Initial 0.9 PyPi package released on TestPyPI. WBL calculations are still being debugged for this release and have been disabled. Use main branch and compile RUQT separately to use WBL calculations.
+
+(1/2026): Preparing package for upload to PyPi and version 0.9 release.
+
 (12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our youtube channel for tutorials on how to use pyRUQT: https://www.youtube.com/@hoyresearchgroup
 
 (12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.

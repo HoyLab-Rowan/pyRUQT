@@ -2,6 +2,9 @@
 Modular Python-based Code for Multiconfigurational Non-Equilibrium Green's Function Methodologies
 
 Most recent changes:
+(8/2026): Main branch updated to debugged PyPI release version with integrated WBL libraries and major sie_negf fixes. 
+Version 0.9 (beta) released on Github and PyPI.
+
 (7/2026): WBL calculations are fully debugged and code restructured for PyPi distribution. Will replace the main branch with this version soon.
 
 (4/2026): Initial 0.9 PyPi package released on TestPyPI. WBL calculations are still being debugged for this release and have been disabled. Use main branch and compile RUQT separately to use WBL calculations.
@@ -10,11 +13,6 @@ Most recent changes:
 
 (12/23/2025): Improved PBC calculator for NEGF-DFT calculations. New run_pyRUQT.py example script which can be used to access all pyRUQT calculations. All other examples are outdated and moved to Old_Examples. We recommend using the run_pyRUQT.py for all pyRUQT calculations. Check out our YouTube channel for tutorials on how to use pyRUQT for charge transport calculations: https://www.youtube.com/@hoyresearchgroup
 
-(12/4/2025): Added support for changing DF auxbasis, charge, and spin for pyscf calculations.
-
-(6/29/2025): Added support for excited state calculations using MC-PDFT.
-
-(5/21/2025): Updated PySCF calculator to allow for far more SCF/MC-PDFT calculation options to be set (particularly SCF and active space optimization options) and added support for restarts and orbital visualization (creates a molden file). Modified all supercell calculations to use the "num_elec_atoms" keyword to set the number of atoms in the electrode (the program now calculates the # of orbitals based on your chosen exmol_prog). Added new es_calc module for running separate electronic structure calculations with PySCF (MOLCAS not supported) which generates both chk files and MolEl.dat files for restarts and separate transport calculations respectively.
 
 This is the Python-based successor to the Rowan University Transport (RUQT) code. It is designed to provide a modular framework for calculating charge 
 transport using non-equilibrium Green's functions built from multiconfigurational electronic structure methods. It can use both an optmized version of the 
