@@ -174,8 +174,10 @@ class sie_negf:
    r_elec=0
    if inp['exmol_prog']=="molcas":
     if inp['molcas_supercell']==True:
+     print('Using molcas syminfo file to determine orbitals in electrode',file=outputfile)
      size_ex,elec_orb=ruqt.read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
     else:
+     print('Using pyscf to estimate # of orbitals in electrode using provided basis set and ecp',file=outputfile)
      geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp']) 
      ao_data=gto.mole.ao_labels(geo2,fmt=False)
      atom_num=0
@@ -186,7 +188,7 @@ class sie_negf:
       atom_num=ao_data[ao_index][0]
       ao_index+=1
       if ao_index == ao_data_len:
-       print("The # of electrode atoms is incorrect")
+       print("The # of electrode atoms is incorrect",file=sys.stderr)
        break
      elec_orb=int(ao_index)-1
 
@@ -201,7 +203,9 @@ class sie_negf:
     fermi_en=inp['fixed_fermi']
     print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
     h=ruqt.fermi_shift(h,s,fermi_en)
-   elif inp['fixed_fermi']==0 and inp['elec_geo']!=None:
+   elif inp['elec_geo']!=None:
+    if inp['fixed_fermi']!=0:
+     print("Overiding fixed_fermi keyword to calculate electrode fermi from elec_geo geometry",file=outfile)
     if inp['pyscf_pbc']==True:
       h1_nouse,s1_nouse,norb_le,numelec_le,fermi_en_1=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
       print("Using Fermi energy from PySCF electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
