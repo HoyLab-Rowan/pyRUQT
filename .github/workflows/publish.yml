@@ -48,7 +48,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
 
-build_sdist:
+  build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
