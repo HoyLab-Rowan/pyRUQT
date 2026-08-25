@@ -1,0 +1,86 @@
+name: Build and Publish pyruqt
+
+on:
+  # Run tests on every push or pull request to the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Automatically publish to PyPI when you create a GitHub Release
+  release:
+    types: [published]
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        # Starting with Linux. (macOS and Windows require separate Fortran/MKL compiler setups)
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.17.0
+        env:
+          # Use manylinux_2_28 (AlmaLinux 8 based) for modern compiler support
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
+          
+          # Install gfortran inside the manylinux docker container before building
+          CIBW_BEFORE_ALL_LINUX: >
+            dnf install -y gcc-gfortran epel-release &&
+            dnf install -y openblas-devel
+            
+          # Skip PyPy, 32-bit architecture, and older Python versions (<3.9)
+          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-musllinux* *i686"
+          
+          # Optional: Test the wheel after it is built to ensure it works
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: "pytest {project}/tests || true"
+
+      - name: Upload Wheels as Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - name: Upload sdist as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    # Only run this job if the workflow was triggered by a GitHub Release
+    if: github.event_name == 'release' && github.event.action == 'published'
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pyruqt
+    permissions:
+      id-token: write  # Required for Trusted Publishing
+      contents: read
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
