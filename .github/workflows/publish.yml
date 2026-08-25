@@ -47,11 +47,18 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-  build_sdist:
+
+build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Fixes the 'Dependency lapack not found' error during sdist build
+      - name: Install system dependencies for sdist
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran libopenblas-dev liblapack-dev pkg-config
 
       - name: Build sdist
         run: pipx run build --sdist
