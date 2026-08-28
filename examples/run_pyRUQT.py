@@ -49,7 +49,7 @@ level_shift=0
 scf_guess="minao"
 frac_occ=False
 
-#These are the calls to the pyscf calculation subroutine
+#These are the calls to the pyruqt calculation subroutines
 if calc_type=="qc":
  es_cal=pyruqt.es_calc(output=outfile,es_dir=xyz_dir,es_geo=xyzfile,dft_functional=dft_functional,basis_set=basis_set,ecp=ecp,scf_algo=scf_algo,es_method=method,conv_tol=conv_tol,mcscf_type=mcscf_type,scf_solver=scf_solver,active_space=active_space,active_orb=active_orb,auto_as=auto_as,verbosity=verbosity,display_orbitals=display_orbitals,max_iter=max_iter,diis_start_cycle=diis_start_cycle,damping=damping,level_shift=level_shift,scf_guess=scf_guess,frac_occ=frac_occ,aux_basis=aux_basis,spin=spin,charge=charge)
  es_cal.single_point()
