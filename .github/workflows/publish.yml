@@ -16,11 +16,18 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Starting with Linux. (macOS and Windows require separate Fortran/MKL compiler setups)
-        os: [ubuntu-latest]
+        os: [ubuntu-latest,windows-latest]
 
     steps:
       - uses: actions/checkout@v4
+      - name: Install Fortran and OpenBLAS (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # Use the pre-installed MSYS2 to get MinGW gfortran, OpenBLAS, and pkg-config
+          C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-openblas mingw-w64-x86_64-pkgconf
+          
+          # Add the MinGW bin folder to the system PATH so Meson can find it
+          echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.17.0
@@ -34,8 +41,8 @@ jobs:
             dnf install -y openblas-devel &&
             dnf install -y lapack-devel
             
-          # Skip PyPy, 32-bit architecture, and older Python versions (<3.9)
-          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-musllinux* *i686"
+          # Skip PyPy, 32-bit architecture, 32-Bit Winddows, and older Python versions (<3.9)
+          CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-musllinux* *i686 *-win32"
           
           # Optional: Test the wheel after it is built to ensure it works
           CIBW_TEST_REQUIRES: pytest
