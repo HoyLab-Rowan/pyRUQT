@@ -38,13 +38,3 @@ pyscf = ["pyscf>=2.0.0"]
 
 [project.urls]
 Homepage = "https://github.com/HoyLab-Rowan/PyRUQT"
-
-[tool.setuptools]
-package-dir = {"" = "pyruqt"}
-
-[tool.setuptools.packages.find]
-where = ["pyruqt"]
-
-[tool.setuptools.package-data]
-"pyruqt" = ["*.so"]
-
