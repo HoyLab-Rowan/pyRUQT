@@ -34,14 +34,16 @@ jobs:
         env:
           # Use manylinux_2_28 (AlmaLinux 8 based) for modern compiler support
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          
+          CIBW_ARCHS_WINDOWS: auto64
+          CIBW_ENVIRONMENT_WINDOWS: "PKG_CONFIG_PATH='C:\\msys64\\mingw64\\lib\\pkgconfig' CC=gcc CXX=g++ FC=gfortran"
+          CIBW_BUILD_VERBOSITY: 1
           # Install gfortran inside the manylinux docker container before building
           CIBW_BEFORE_ALL_LINUX: >
             dnf install -y gcc-gfortran epel-release pkgconfig &&
             dnf install -y openblas-devel &&
             dnf install -y lapack-devel
             
-          # Skip PyPy, 32-bit architecture, 32-Bit Winddows, and older Python versions (<3.9)
+          # Skip PyPy, 32-bit architecture, 32-Bit Windows, and older Python versions (<3.9)
           CIBW_SKIP: "cp36-* cp37-* cp38-* pp* *-musllinux* *i686 *-win32"
           
           # Optional: Test the wheel after it is built to ensure it works
