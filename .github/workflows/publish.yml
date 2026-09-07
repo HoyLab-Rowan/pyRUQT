@@ -24,7 +24,7 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           # Use the pre-installed MSYS2 to get MinGW gfortran, OpenBLAS, and pkg-config
-          C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-openblas mingw-w64-x86_64-pkgconf
+          C:\msys64\usr\bin\pacman -S --noconfirm mingw-w64-x86_64-gcc-fortran mingw-w64-x86_64-openblas mingw-w64-x86_64-lapack mingw-w64-x86_64-pkgconf
           
           # Add the MinGW bin folder to the system PATH so Meson can find it
           echo "C:\msys64\mingw64\bin" >> $env:GITHUB_PATH
