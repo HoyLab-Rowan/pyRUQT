@@ -1,7 +1,5 @@
 import numpy as np
 import scipy
-from pyscf import gto,dft,scf,mcscf,mcpdft,lo,tools
-from pyscf.mcscf import avas
 from ase import transport,Atoms,units
 import matplotlib.pyplot as plt
 import string,subprocess
@@ -112,6 +110,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
  from pyscf.pbc import scf as pbcscf
  from pyscf.pbc import dft as pbcdft
  from pyscf.pbc import df as pdf
+ from pyscf import scf
 
  if pyscf_settings[0]=="dft":
   outputfile=open(pyscf_settings[9]+".log",'w')
@@ -211,7 +210,8 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
 
 #calculates electric structure info (Hamiltonian, Overlap) with non-PBC PySCF
 def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_settings,pyscf_conv_settings):
- #from pyscf import gto,dft,scf
+ from pyscf import gto,dft,scf,mcscf,mcpdft,lo,tools
+ from pyscf.mcscf import avas
 
  outputfile=open(pyscf_settings[9]+".out",'w')
  geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5],output=pyscf_settings[9]+".log",spin=pyscf_conv_settings[11],charge=pyscf_conv_settings[10])
@@ -642,7 +642,8 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
 
 #The next 2 routines print pyscf data to a MolEl.dat file for use in reruns
 def prepare_outputs(h,s,pyscf_settings,pyscf_elec,mc,geo):
- norb=len(h)
+
+ orb=len(h)
  numelec=int(np.sum(pyscf_elec.mo_occ))
  nTotEl = geo.nelec[0]+ geo.nelec[1]
  if mc != "None":

@@ -36,7 +36,6 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_WINDOWS: auto64
           CIBW_ENVIRONMENT_WINDOWS: "PKG_CONFIG_PATH='C:\\msys64\\mingw64\\lib\\pkgconfig' CC=gcc CXX=g++ FC=gfortran"
-          CIBW_BUILD_VERBOSITY: 1
           # Install gfortran inside the manylinux docker container before building
           CIBW_BEFORE_ALL_LINUX: >
             dnf install -y gcc-gfortran epel-release pkgconfig &&

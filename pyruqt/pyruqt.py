@@ -1,5 +1,4 @@
 from ase import transport,Atoms,units
-from pyscf import gto
 import matplotlib.pyplot as plt
 import numpy as np
 from pyruqt import ruqt
@@ -67,6 +66,7 @@ class sie_negf:
                           'scf_guess'     : 'minao',
                           'frac_occ'      : 'false',
                           'molcas_supercell'      : False,
+                          'maple_supercell'      : False,
                           'charge'        : 0,
                           'spin'          : 0,
                           'smearing' : None,
@@ -74,7 +74,8 @@ class sie_negf:
                           'remove_linear_dep' : True,
                           'kpoints'       : [1,1,1],
                           'fixed_fermi' : 0,
-                          'big_supercell' : True
+                          'big_supercell' : True,
+                          'maple_elec_orbs' : None
                           }
   self.param_update(**kwargs)
   
@@ -109,6 +110,15 @@ class sie_negf:
    print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4],file=outputfile)
    if pyscf_settings[0]=="mcpdft":
     print("Using Pyscf for an MC-PDFT calculation",file=outputfile)
+  elif inp['exmol_prog']=="maple":
+   print("Calculated extended molecular region using Maple",file=outputfile)
+  elif inp['elec_prog']=="maple":
+   print("Calculated left electrode using Maple",file=outputfile)
+   if inp['elec2_dir']!=None:
+    print("Using non-identical electrodes.",file=outputfile)
+   else:
+    print("Assuming symmetric electrodes",file=outputfile)
+
   if inp['elec_prog']=="molcas":
    print("Using Molcas calculation at "+inp['elec_dir']+" for left electrode",file=outputfile)
    if inp['elec2_dir']!=None:
@@ -120,6 +130,8 @@ class sie_negf:
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    #h,s=ruqt.esc_molcas(exmol_file,exmol_dir,exmol_molcasd,state_num,outputfile)
+  elif inp['exmol_prog']=="maple":
+   h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
   elif inp['exmol_prog']=="pyscf":
    if inp['pyscf_pbc']==True:
     h,s,norb,numelec,fermi_en=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
@@ -140,6 +152,22 @@ class sie_negf:
     h1=ruqt.fermi_shift(h1,s1,fermi_en)
    elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
      print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
+     sys.exit()
+
+  if inp['elec_prog']=="maple":
+   h1,s1,norb_le,numelec_le,actorb_le,actelec_le,states_le=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   if inp['elec2_dir']!=None:
+    h2,s2,norb_re,numelec_re,actorb_re,actelec_re,states_re=ruqt.esc_molcas2(inp['elec_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   else:
+    h2=None
+    s2=None
+   if inp['fixed_fermi']!=0 and inp['elec_geo']==None:
+    fermi_en=inp['fixed_fermi']
+    print("Using fixed Fermi energy of: "+str(fermi_en)+" eV",file=outputfile)
+    h=ruqt.fermi_shift(h,s,fermi_en)
+    h1=ruqt.fermi_shift(h1,s1,fermi_en)
+   elif inp['fixed_fermi']==0 and inp['elec_geo']!=[None]:
+     print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Maple, please provide a fixed Fermi energy.",file=outputfile)
      sys.exit()
 
   elif inp['elec_prog']=="pyscf":
@@ -177,6 +205,7 @@ class sie_negf:
      print('Using molcas syminfo file to determine orbitals in electrode',file=outputfile)
      size_ex,elec_orb=ruqt.read_syminfo(inp['exmol_dir'],0,inp['num_elec_atoms'],inp['output'])
     else:
+     from pyscf import gto
      print('Using pyscf to estimate # of orbitals in electrode using provided basis set and ecp',file=outputfile)
      geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp']) 
      ao_data=gto.mole.ao_labels(geo2,fmt=False)
@@ -194,6 +223,9 @@ class sie_negf:
 
     l_elec=elec_orb
     r_elec=elec_orb
+   elif inp['elec_prog']=="maple":
+    l_elec=inp['maple_elec_orbs']
+    r_elec=inp['maple_elec_orbs']
    else:
     l_elec=elec_orb
     r_elec=elec_orb
@@ -205,7 +237,7 @@ class sie_negf:
     h=ruqt.fermi_shift(h,s,fermi_en)
    elif inp['elec_geo']!=None:
     if inp['fixed_fermi']!=0:
-     print("Overiding fixed_fermi keyword to calculate electrode fermi from elec_geo geometry",file=outfile)
+     print("Overiding fixed_fermi keyword to calculate electrode fermi from elec_geo geometry",file=outputfile)
     if inp['pyscf_pbc']==True:
       h1_nouse,s1_nouse,norb_le,numelec_le,fermi_en_1=ruqt.esc_pyscf_pbc(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
       print("Using Fermi energy from PySCF electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
@@ -213,7 +245,7 @@ class sie_negf:
       h1_nouse,s1_nouse,norb_le,numelec_le,elec_orb_le,fermi_en_1=ruqt.esc_pyscf2(inp['elec_dir']+inp['elec_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
       print("Using Fermi energy from PySCF electrode calculation: "+str(fermi_en_1)+" eV",file=outputfile)
     else:
-     print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas, please provide a fixed Fermi energy.",file=outputfile)
+     print("Note that Fermi level calculation is only available for PySCF calculations. If you are using Molcas or Maple, please provide a fixed Fermi energy.",file=outputfile)
      print("Assuming Hamiltonian is already shifted by Fermi energy. Please make sure this is the case or provide a fixed Fermi energy.",file=outputfile)
      fermi_en_1=0
 
@@ -445,7 +477,9 @@ class wbl_negf:
                           'smearing' : None,
                           'smearing_width' : 0.05,
                           'remove_linear_dep' : True,
-                          'kpoints'      : [1,1,1]}
+                          'kpoints'      : [1,1,1],
+                          'maple_elec_orbs' : None
+                          }
   self.param_update(**kwargs)
 
  def param_update(self,**kwargs):
@@ -478,12 +512,15 @@ class wbl_negf:
    print("Using the effective Hamiltonian for electronic state "+str(inp['state_num'])+" of extended mol. region",file=outputfile)
   elif inp['exmol_prog']=="pyscf":
    print("Calculating extended molecular region using Pyscf with "+pyscf_settings[4],file=outputfile)
+  elif inp['exmol_prog']=="maple":
+   print("Calculating extended molecular region using Maple",file=outputfile)
 
   if inp['exmol_prog']=="molcas":
    h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
    if inp['molcas_supercell']==True:
     elec_orb=0
    else:
+    from pyscf import gto
     geo2=gto.M(atom=inp['exmol_dir']+inp['exmol_geo'],basis=inp['basis_set'],ecp=inp['ecp'])
     ao_data=gto.mole.ao_labels(geo2,fmt=False)
     atom_num=0
@@ -504,6 +541,10 @@ class wbl_negf:
     h,s,norb,numelec,fermi_en=ruqt.esc_pyscf_pbc(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['lattice_v'],inp['meshnum'],inp['cell_dim'],inp['kpoints'],pyscf_settings,pyscf_conv_settings)
    else:
     h,s,norb,numelec,elec_orb,fermi_en=ruqt.esc_pyscf2(inp['exmol_dir']+inp['exmol_geo'],pyscf_settings[4],inp['basis_set'],inp['ecp'],inp['num_elec_atoms'],pyscf_settings,pyscf_conv_settings)
+
+  elif inp['exmol_prog']=="maple":
+   h,s,norb,numelec,actorb,actelec,states=ruqt.esc_molcas2(inp['exmol_dir'],"MolEl.dat",inp['state_num'],outputfile)
+   elec_orb=inp['maple_elec_orbs']
 
   return(energies,bias,outputfile,h,s,norb,numelec,elec_orb)
 
