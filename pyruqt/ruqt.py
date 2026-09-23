@@ -69,7 +69,7 @@ def molel_matread(matrixfile,norb,data_mat,mat_type):
 
  elif mat_type=='H':
    line=matrixfile.readline()
-   while "State" and "Orbital Energies" not in line:
+   while "State" not in line and "Orbital Energies" not in line:
     line_data=line.split()
     data_mat[int(line_data[0])-1,int(line_data[1])-1]=float(line_data[2])
     line=matrixfile.readline()
@@ -210,8 +210,7 @@ def esc_pyscf_pbc(geofile,dft_functional,basis_set,ecp,lattice_v,meshnum,cell_di
 
 #calculates electric structure info (Hamiltonian, Overlap) with non-PBC PySCF
 def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_settings,pyscf_conv_settings):
- from pyscf import gto,dft,scf,mcscf,mcpdft,lo,tools
- from pyscf.mcscf import avas
+ from pyscf import gto,dft,scf,mcscf,lo,tools
 
  outputfile=open(pyscf_settings[9]+".out",'w')
  geo=gto.M(atom=geofile,basis=basis_set,ecp=ecp,verbose=pyscf_settings[5],output=pyscf_settings[9]+".log",spin=pyscf_conv_settings[11],charge=pyscf_conv_settings[10])
@@ -294,6 +293,8 @@ def esc_pyscf2(geofile,dft_functional,basis_set,ecp,num_elec_atoms,pyscf_setting
    #norb=len(h)
    #numelec=int(np.sum(pyscf_elec.mo_occ))
  elif pyscf_settings[0]=="mcpdft":
+  from pyscf import mcpdft
+  from pyscf.mcscf import avas
   #Pyscf mcpdft routine modified from original version created by Dr. Andrew Sand (Butler University)
   [nActEl,nAct]=pyscf_settings[2]
   if pyscf_settings[3]=="rks":
